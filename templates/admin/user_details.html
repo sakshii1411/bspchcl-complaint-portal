@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}User Details – BSPHCL Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="{{ url_for('admin.manage_users') }}" class="btn-ghost" style="padding:7px 14px;">← Back</a>
+  <h4 class="fw-800 mb-0">User Details</h4>
+</div>
+
+<div class="row g-4">
+  <!-- Left: User Card -->
+  <div class="col-lg-4">
+    <div class="card p-4 text-center mb-4 fade-in-up">
+      <div class="profile-avatar-placeholder mx-auto mb-3">{{ user.name[0].upper() }}</div>
+      <h5 class="fw-800 mb-1">{{ user.name }}</h5>
+      <div style="font-size:12px;color:var(--text-muted);">{{ user.email }}</div>
+      <div class="mt-2">
+        {% if user.is_active %}
+          <span class="badge-status badge-resolved">Active Account</span>
+        {% else %}
+          <span class="badge-status badge-rejected">Inactive Account</span>
+        {% endif %}
+      </div>
+      <div class="row g-2 mt-3">
+        <div class="col-6">
+          <div style="background:var(--bg);border-radius:var(--radius-sm);padding:12px;">
+            <div class="fw-800" style="font-size:20px;">{{ total }}</div>
+            <div style="font-size:11px;color:var(--text-muted);">Total</div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div style="background:var(--success-soft);border-radius:var(--radius-sm);padding:12px;">
+            <div class="fw-800" style="font-size:20px;color:var(--success);">{{ resolved }}</div>
+            <div style="font-size:11px;color:var(--text-muted);">Resolved</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-4 mb-4">
+      <h6 class="fw-700 mb-3">Account Information</h6>
+      {% set details = [
+        ('Mobile', user.mobile),
+        ('Consumer No.', user.consumer_number or 'N/A'),
+        ('District', user.district or 'N/A'),
+        ('Address', user.address or 'N/A'),
+        ('State', user.state or 'Bihar'),
+        ('Joined', user.created_at.strftime('%d %b %Y')),
+        ('Last Login', user.last_login.strftime('%d %b %Y, %I:%M %p') if user.last_login else 'Never'),
+      ] %}
+      {% for label, val in details %}
+      <div class="d-flex justify-content-between" style="font-size:13px;padding:8px 0;border-bottom:1px solid var(--border-light);">
+        <span style="color:var(--text-muted);min-width:100px;">{{ label }}</span>
+        <span class="fw-600 text-end" style="word-break:break-word;">{{ val }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="d-flex flex-column gap-2">
+      <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn-primary-custom justify-content-center w-100">✏️ Edit User</a>
+      <form method="POST" action="{{ url_for('admin.toggle_user', user_id=user.id) }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn-ghost w-100 justify-content-center"
+                style="color:{{ 'var(--danger)' if user.is_active else 'var(--success)' }};">
+          {{ '🚫 Deactivate Account' if user.is_active else '✅ Activate Account' }}
+        </button>
+      </form>
+      <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn-ghost w-100 justify-content-center" style="color:var(--danger);"
+                data-confirm="Permanently delete {{ user.name }} and all their data?">
+          🗑️ Delete User
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right: Complaints -->
+  <div class="col-lg-8">
+    <div class="card p-0">
+      <div class="p-4 pb-2">
+        <h6 class="fw-700">Recent Complaints</h6>
+        <p style="font-size:12px;color:var(--text-muted);">Last 10 complaints by this user</p>
+      </div>
+      {% if complaints %}
+      <div class="table-responsive">
+        <table class="bsp-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>SUBJECT</th><th>CATEGORY</th><th>STATUS</th><th>PRIORITY</th><th>DATE</th><th>ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in complaints %}
+            <tr>
+              <td><span class="text-primary fw-600">{{ c.complaint_id }}</span></td>
+              <td>
+                <div class="fw-600" style="font-size:13px;">{{ c.subject[:30] }}{% if c.subject|length > 30 %}...{% endif %}</div>
+              </td>
+              <td><span class="badge-cat">{{ c.get_category_label() }}</span></td>
+              <td><span class="badge-status badge-{{ c.status }}">{{ c.get_status_label() }}</span></td>
+              <td><span class="badge-priority {{ c.priority }}">{{ c.priority.upper() }}</span></td>
+              <td style="font-size:12px;color:var(--text-muted);">{{ c.created_at.strftime('%d %b %Y') }}</td>
+              <td>
+                <a href="{{ url_for('admin.complaint_detail_admin', complaint_id=c.complaint_id) }}"
+                   class="btn-ghost" style="padding:5px 10px;font-size:12px;">View</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center p-5 text-muted">
+        <div style="font-size:36px;margin-bottom:8px;">📭</div>
+        <p style="font-size:13px;">No complaints filed by this user.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

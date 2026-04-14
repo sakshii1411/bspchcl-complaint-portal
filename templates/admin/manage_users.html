@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Manage Users – BSPHCL Admin{% endblock %}
+{% block search_placeholder %}Search users by name, email or mobile...{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h4 class="fw-800 mb-1">Manage Users</h4>
+    <p class="text-muted" style="font-size:13px;">View, edit, activate, or remove consumer accounts.</p>
+  </div>
+  <div style="font-size:13px;color:var(--text-muted);">
+    Total Records: <strong>{{ pagination.total }}</strong>
+  </div>
+</div>
+
+<!-- Filters -->
+<form method="GET" class="filter-bar mb-4">
+  <input type="text" name="search" placeholder="Search by Name / Email / Mobile"
+         value="{{ search }}" style="min-width:200px;flex:1;"/>
+  <select name="status">
+    <option value="all"   {{ 'selected' if status == 'all' }}>All Status</option>
+    <option value="active" {{ 'selected' if status == 'active' }}>Active</option>
+    <option value="inactive" {{ 'selected' if status == 'inactive' }}>Inactive</option>
+  </select>
+  <button type="submit" class="btn-primary-custom" style="padding:8px 18px;">Search</button>
+  <a href="{{ url_for('admin.manage_users') }}" class="btn-ghost" style="padding:8px 14px;">Reset</a>
+</form>
+
+<div class="card p-0">
+  {% if pagination.items %}
+  <div class="table-responsive">
+    <table class="bsp-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>CONSUMER NAME</th>
+          <th>MOBILE</th>
+          <th>CONSUMER NO.</th>
+          <th>DISTRICT</th>
+          <th>TOTAL COMPLAINTS</th>
+          <th>STATUS</th>
+          <th>JOINED</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in pagination.items %}
+        <tr class="searchable-row">
+          <td style="color:var(--text-muted);">{{ loop.index + (pagination.page-1)*pagination.per_page }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="topbar-avatar" style="width:34px;height:34px;font-size:13px;">{{ user.name[0].upper() }}</div>
+              <div>
+                <div class="fw-600" style="font-size:13px;">{{ user.name }}</div>
+                <div style="font-size:11px;color:var(--text-muted);">{{ user.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td>{{ user.mobile }}</td>
+          <td style="font-size:12px;color:var(--primary);">{{ user.consumer_number or 'N/A' }}</td>
+          <td>{{ user.district.title() if user.district else '—' }}</td>
+          <td>
+            <span class="badge-cat">{{ user.complaints.count() }}</span>
+          </td>
+          <td>
+            {% if user.is_active %}
+              <span class="badge-status badge-resolved">Active</span>
+            {% else %}
+              <span class="badge-status badge-rejected">Inactive</span>
+            {% endif %}
+          </td>
+          <td style="color:var(--text-muted);font-size:12px;">{{ user.created_at.strftime('%d %b %Y') }}</td>
+          <td>
+            <div class="d-flex gap-1 flex-wrap">
+              <a href="{{ url_for('admin.user_details', user_id=user.id) }}"
+                 class="btn-ghost" style="padding:5px 10px;font-size:12px;">View Details</a>
+              <a href="{{ url_for('admin.edit_user', user_id=user.id) }}"
+                 class="btn-ghost" style="padding:5px 10px;font-size:12px;">Edit</a>
+              <form method="POST" action="{{ url_for('admin.toggle_user', user_id=user.id) }}" style="display:inline;">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-ghost" style="padding:5px 10px;font-size:12px;
+                  color:{{ '#b02a37' if user.is_active else 'var(--success)' }};"
+                  onclick="return confirm('Are you sure you want to change user status?');">
+                  {{ 'Deactivate' if user.is_active else 'Activate' }}
+                </button>
+              </form>
+              <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" style="display:inline;">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-ghost" style="padding:5px 10px;font-size:12px;color:var(--danger);"
+                        data-confirm="Delete user {{ user.name }}? This also deletes all their complaints.">🗑</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="d-flex justify-content-between align-items-center p-4">
+    <div style="font-size:12px;color:var(--text-muted);">
+      Showing {{ (pagination.page-1)*pagination.per_page+1 }}–{{ [pagination.page*pagination.per_page, pagination.total]|min }} of {{ pagination.total }}
+    </div>
+    <div class="pagination-custom">
+      <a href="{{ url_for('admin.manage_users', page=pagination.prev_num, search=search, status=status) if pagination.has_prev else '#' }}"
+         class="page-btn {{ 'disabled' if not pagination.has_prev }}">‹</a>
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          <a href="{{ url_for('admin.manage_users', page=p, search=search, status=status) }}"
+             class="page-btn {{ 'active' if p == pagination.page }}">{{ p }}</a>
+        {% else %}
+          <span class="page-btn">…</span>
+        {% endif %}
+      {% endfor %}
+      <a href="{{ url_for('admin.manage_users', page=pagination.next_num, search=search, status=status) if pagination.has_next else '#' }}"
+         class="page-btn {{ 'disabled' if not pagination.has_next }}">›</a>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="text-center p-5 text-muted">
+    <div style="font-size:40px;margin-bottom:12px;">👥</div>
+    <h6>No users found</h6>
+    <p style="font-size:13px;">Try adjusting your search filters.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

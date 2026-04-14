@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{ complaint.complaint_id }} - BSPHCL Portal{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card p-4 mb-4">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+        <div>
+          <div class="complaint-id-pill mb-2">{{ complaint.complaint_id }}</div>
+          <h4 class="fw-800 mb-1">{{ complaint.subject }}</h4>
+          <div class="d-flex gap-2 flex-wrap mt-2">
+            <span class="badge-status badge-{{ complaint.status }}">{{ complaint.get_status_label() }}</span>
+            <span class="badge-priority {{ complaint.priority }}">{{ complaint.get_priority_label() }}</span>
+            <span class="badge-cat">{{ complaint.get_category_label() }}</span>
+            {% if complaint.is_overdue %}<span class="badge-cat" style="background:#fef2f2;color:#b91c1c;">Overdue</span>{% endif %}
+          </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <a href="{{ url_for('main.download_receipt', complaint_id=complaint.complaint_id) }}" class="btn-ghost">Acknowledgement PDF</a>
+          {% if complaint.status in ['resolved','closed'] %}<a href="{{ url_for('main.download_resolution_report', complaint_id=complaint.complaint_id) }}" class="btn-ghost">Resolution Report</a>{% endif %}
+          {% if complaint.can_be_edited_by_user %}<a href="{{ url_for('main.edit_complaint', complaint_id=complaint.complaint_id) }}" class="btn-ghost">Edit Complaint</a>{% endif %}
+        </div>
+      </div>
+      <p class="mb-3">{{ complaint.description }}</p>
+      <div class="row g-3 mb-4">
+        <div class="col-md-6"><div class="card p-3 h-100"><div class="text-muted small">Department</div><div class="fw-700">{{ complaint.department or 'Pending review' }}</div></div></div>
+        <div class="col-md-6"><div class="card p-3 h-100"><div class="text-muted small">Expected Resolution Date</div><div class="fw-700">{{ complaint.expected_resolution_date.strftime('%d %b %Y') if complaint.expected_resolution_date else 'To be updated' }}</div></div></div>
+      </div>
+      <div class="card p-3 mb-4">
+        <h6 class="fw-700 mb-3">Tracking Progress</h6>
+        <div class="d-flex flex-wrap gap-2">
+          {% for label, step in complaint.progress_steps %}
+          <div class="px-3 py-2 rounded-pill {% if complaint.current_step >= step %}text-white{% endif %}" style="background:{% if complaint.current_step >= step %}var(--primary){% else %}var(--bg2){% endif %};">{{ label }}</div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="card p-3 mb-4">
+        <h6 class="fw-700 mb-3">Timeline</h6>
+        {% if timeline %}
+          {% for item in timeline %}
+          <div class="d-flex justify-content-between gap-3 py-2 border-bottom">
+            <div><div class="fw-600">{{ item.action.replace('_',' ').title() }}</div><div class="text-muted small">{{ item.message }}</div></div>
+            <div class="small text-muted">{{ item.created_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+          </div>
+          {% endfor %}
+        {% else %}<div class="text-muted">No timeline updates yet.</div>{% endif %}
+      </div>
+      {% if attachments %}<div class="card p-3"><h6 class="fw-700 mb-3">Attachments</h6>{% for file in attachments %}<div class="py-2 border-bottom"><a href="{{ url_for('static', filename='uploads/' + file.file_path) }}" target="_blank">{{ file.original_name or file.file_path }}</a></div>{% endfor %}</div>{% endif %}
+    </div>
+    <div class="card p-4">
+      <h6 class="fw-700 mb-3">Replies</h6>
+      {% for r in replies %}
+      <div class="mb-3 p-3 rounded" style="background:var(--bg2);"><div class="fw-600">{{ r.author.name if r.author else 'User' }}{% if r.is_admin_reply %} <span class="small text-primary">(Staff)</span>{% endif %}</div><div>{{ r.message }}</div><div class="small text-muted mt-1">{{ r.created_at.strftime('%d %b %Y, %I:%M %p') }}</div></div>
+      {% else %}<div class="text-muted mb-3">No replies yet.</div>{% endfor %}
+      <form method="POST">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="reply"><textarea name="message" class="form-control-custom" rows="3" placeholder="Add a follow-up message"></textarea><button class="btn-primary-custom mt-3">Post Reply</button></form>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card p-4 mb-4">
+      <h6 class="fw-700 mb-3">Complaint Summary</h6>
+      <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Filed On</span><span>{{ complaint.created_at.strftime('%d %b %Y') }}</span></div>
+      <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">District</span><span>{{ complaint.district or 'Not specified' }}</span></div>
+      <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Assigned Officer</span><span>{{ complaint.assignee.name if complaint.assignee else 'Pending assignment' }}</span></div>
+      <div class="d-flex justify-content-between py-2"><span class="text-muted">Reopen Count</span><span>{{ complaint.reopen_count }}</span></div>
+    </div>
+    {% if complaint.status == 'resolved' %}
+    <div class="card p-4 mb-4"><form method="POST">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="close"><button class="btn-primary-custom w-100">Mark as Closed</button></form></div>
+    {% endif %}
+    {% if complaint.status in ['resolved','closed'] %}
+    <div class="card p-4 mb-4">
+      <h6 class="fw-700 mb-3">Reopen Complaint</h6>
+      <form method="POST">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="reopen"><textarea name="reopen_reason" class="form-control-custom" rows="3" placeholder="Reason for reopening"></textarea><button class="btn-ghost mt-3">Reopen</button></form>
+    </div>
+    {% if not complaint.rating %}
+    <div class="card p-4"><h6 class="fw-700 mb-3">Satisfaction Rating</h6><form method="POST">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="rate"><select name="rating" class="form-control-custom mb-3"><option value="">Select rating</option>{% for i in range(1,6) %}<option value="{{ i }}">{{ i }} / 5</option>{% endfor %}</select><textarea name="feedback" class="form-control-custom" rows="3" placeholder="Optional feedback"></textarea><button class="btn-primary-custom mt-3">Submit Feedback</button></form></div>
+    {% else %}<div class="card p-4"><h6 class="fw-700 mb-2">Feedback Submitted</h6><div class="text-muted">Rating: {{ complaint.rating.rating }}/5</div></div>{% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

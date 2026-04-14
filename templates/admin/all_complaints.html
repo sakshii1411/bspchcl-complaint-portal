@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}All Complaints - BSPHCL Portal{% endblock %}
+{% block content %}
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-6">
+    <div class="card p-3">
+      <div class="small text-muted">Total Records</div>
+      <div class="fw-800" style="font-size:24px;">{{ pagination.total }}</div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="card p-3">
+      <div class="small text-muted">Pending</div>
+      <div class="fw-800" style="font-size:24px;">
+        {{ pagination.items | selectattr('status', 'equalto', 'pending') | list | length }}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="card p-3">
+      <div class="small text-muted">Resolved</div>
+      <div class="fw-800" style="font-size:24px;">
+        {{ pagination.items | selectattr('status', 'equalto', 'resolved') | list | length }}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="card p-3">
+      <div class="small text-muted">In Review</div>
+      <div class="fw-800" style="font-size:24px;">
+        {{ pagination.items | selectattr('status', 'equalto', 'under_review') | list | length }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card p-4 mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2"><div><h4 class="fw-800 mb-0">Complaint Records</h4><div class="small text-muted mt-1">Age shows the number of days since complaint registration.</div></div><div class="d-flex gap-2"><a class="btn-ghost" href="{{ url_for('admin.export_complaints_excel') }}">Export Excel</a><a class="btn-ghost" href="{{ url_for('admin.export_complaints_pdf') }}">Export PDF</a></div></div>
+  <form method="GET" class="row g-3">
+    <div class="col-md-3"><input type="text" name="search" class="form-control-custom" placeholder="Search by Complaint ID / Consumer No" value="{{ search }}"></div>
+    <div class="col-md-2"><select name="status" class="form-control-custom"><option value="all">Status</option>{% for val,label in statuses %}<option value="{{ val }}" {% if current_status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-md-2"><select name="priority" class="form-control-custom"><option value="all">Priority</option>{% for val,label in priorities %}<option value="{{ val }}" {% if current_priority == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-md-2"><select name="category" class="form-control-custom"><option value="all">Category</option>{% for val,label in categories %}<option value="{{ val }}" {% if current_category == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-md-2"><select name="district" class="form-control-custom"><option value="all">District</option>{% for d in districts %}<option value="{{ d }}" {% if current_district == d %}selected{% endif %}>{{ d }}</option>{% endfor %}</select></div>
+    <div class="col-md-1"><button class="btn-primary-custom w-100">Filter</button></div><div class="col-md-1"><a href="{{ url_for('admin.all_complaints') }}" class="btn-ghost w-100">Reset</a></div>
+  </form>
+</div>
+<div class="card p-4 mb-4">
+  <h6 class="fw-700 mb-3">Bulk Action</h6>
+  <form method="POST" action="{{ url_for('admin.bulk_update_complaints') }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    <div class="row g-3 align-items-end mb-3"><div class="col-md-4"><label class="form-label">Status</label><select name="bulk_status" class="form-control-custom"><option value="">Select Status</option>{% for val,label in statuses %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div><div class="col-md-4"><label class="form-label">Assign to</label><select name="bulk_assigned_to" class="form-control-custom"><option value="">Assign Staff</option>{% for s in staff_members %}<option value="{{ s.id }}">{{ s.name }} - {{ s.display_role }}</option>{% endfor %}</select></div><div class="col-md-4"><button class="btn-primary-custom">Apply Changes</button></div></div>
+    <div class="table-responsive"><table class="bsp-table"><thead><tr><th><input type="checkbox" id="select-all"></th><th>ID</th><th>Consumer No</th><th>Subject</th><th>Status</th><th>Priority</th><th>District</th><th>Age</th><th>Assigned To</th><th>Action</th></tr></thead><tbody>{% for c in pagination.items %}<tr><td><input type="checkbox" name="complaint_ids" value="{{ c.id }}"></td><td>{{ c.complaint_id }}</td><td>{{ c.consumer_number }}</td><td>{{ c.subject }}</td><td><span class="badge-status badge-{{ c.status }}">{{ c.get_status_label() }}</span></td><td>{{ c.get_priority_label() }}</td><td>{{ c.district.title() if c.district else 'N/A' }}</td><td>{{ (now.date() - c.created_at.date()).days }} day{% if (now.date() - c.created_at.date()).days != 1 %}s{% endif %}</td><td>{{ c.assignee.name if c.assignee else 'Pending' }}</td><td><a href="{{ url_for('admin.complaint_detail_admin', complaint_id=c.complaint_id) }}" class="btn-outline-custom py-1 px-3" style="border-radius:10px;">View Details</a></td></tr>{% endfor %}</tbody></table></div>
+  </form>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const selectAll = document.getElementById('select-all');
+  if (selectAll) {
+    selectAll.addEventListener('change', function () {
+      document.querySelectorAll('input[name="complaint_ids"]').forEach(cb => {
+        cb.checked = selectAll.checked;
+      });
+    });
+  }
+});
+</script>
+{% endblock %}

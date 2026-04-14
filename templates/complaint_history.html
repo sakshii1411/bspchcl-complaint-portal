@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Complaint History - BSPHCL Portal{% endblock %}
+
+{% block content %}
+<style>
+.complaint-stat-card{
+  min-height: 96px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.complaint-stat-card .stat-number{
+  line-height:1;
+  margin-bottom:8px;
+}
+.complaint-stat-card .stat-label{
+  margin-bottom:0;
+}
+</style>
+
+{% set complaint_rows = pagination.items if pagination is defined else (complaints if complaints is defined else []) %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+  <div>
+    <h4 class="fw-800 mb-1">Complaint History</h4>
+    <p class="text-muted mb-0">View and track the status of complaints submitted by you.</p>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    {% if export_csv_url is defined %}
+      <a href="{{ export_csv_url }}" class="btn-ghost">Export CSV</a>
+    {% endif %}
+    <a href="{{ url_for('main.new_complaint') }}" class="btn-primary-custom">+ New Complaint</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-6">
+    <div class="stat-card primary complaint-stat-card">
+      <div class="stat-number">{{ total if total is defined else 0 }}</div>
+      <div class="stat-label">Total Complaints</div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="stat-card success complaint-stat-card">
+      <div class="stat-number">{{ resolved if resolved is defined else 0 }}</div>
+      <div class="stat-label">Resolved</div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="stat-card warning complaint-stat-card">
+      <div class="stat-number">{{ pending if pending is defined else 0 }}</div>
+      <div class="stat-label">Pending Complaints</div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="stat-card danger complaint-stat-card">
+      <div class="stat-number">{{ rejected if rejected is defined else 0 }}</div>
+      <div class="stat-label">Rejected Complaints</div>
+    </div>
+  </div>
+</div>
+
+<div class="card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h5 class="fw-700 mb-0">Complaint Records</h5>
+  </div>
+
+  <form method="GET" class="mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-lg-5">
+        <input
+          type="text"
+          name="search"
+          class="form-control-custom"
+          placeholder="Search by ID or subject"
+          value="{{ search if search is defined else request.args.get('search', '') }}"
+        >
+      </div>
+
+      <div class="col-lg-3">
+        <select name="category" class="form-control-custom">
+          <option value="all">All Categories</option>
+          {% if categories is defined %}
+            {% for val, label in categories %}
+              <option value="{{ val }}" {% if (current_category is defined and current_category == val) or request.args.get('category') == val %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          {% endif %}
+        </select>
+      </div>
+
+      <div class="col-lg-2">
+        <select name="status" class="form-control-custom">
+          <option value="all">All Status</option>
+          <option value="pending" {% if (current_status is defined and current_status == 'pending') or request.args.get('status') == 'pending' %}selected{% endif %}>Pending</option>
+          <option value="resolved" {% if (current_status is defined and current_status == 'resolved') or request.args.get('status') == 'resolved' %}selected{% endif %}>Resolved</option>
+          <option value="closed" {% if (current_status is defined and current_status == 'closed') or request.args.get('status') == 'closed' %}selected{% endif %}>Closed</option>
+          <option value="rejected" {% if (current_status is defined and current_status == 'rejected') or request.args.get('status') == 'rejected' %}selected{% endif %}>Rejected</option>
+        </select>
+      </div>
+
+      <div class="col-lg-2">
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn-primary-custom w-100 justify-content-center">Apply</button>
+          <a href="{{ url_for('main.complaint_history') }}" class="btn-ghost justify-content-center">Reset</a>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  {% if complaint_rows %}
+    <div class="table-responsive">
+      <table class="bsp-table">
+        <thead>
+          <tr>
+            <th>COMPLAINT ID</th>
+            <th>SUBJECT</th>
+            <th>CATEGORY</th>
+            <th>SUBMITTED ON</th>
+            <th>STATUS</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in complaint_rows %}
+          <tr>
+            <td style="white-space:nowrap;">
+              <span class="text-primary fw-600">{{ c.complaint_id }}</span>
+            </td>
+            <td>
+              <div class="fw-600">{{ c.subject }}</div>
+              {% if c.description %}
+                <div class="small text-muted">{{ c.description[:60] }}{% if c.description|length > 60 %}...{% endif %}</div>
+              {% endif %}
+            </td>
+            <td>
+              {% if c.get_category_label is defined %}
+                <span class="badge-cat">{{ c.get_category_label() }}</span>
+              {% else %}
+                <span class="badge-cat">{{ c.category }}</span>
+              {% endif %}
+            </td>
+            <td style="white-space:nowrap;">
+              {{ c.created_at.strftime('%d %b %Y') if c.created_at else '-' }}
+            </td>
+            <td>
+              {% if c.get_status_label is defined %}
+                <span class="badge-status badge-{{ c.status }}">{{ c.get_status_label() }}</span>
+              {% else %}
+                <span class="badge-status badge-{{ c.status }}">{{ c.status|replace('_', ' ')|title }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ url_for('main.complaint_detail', complaint_id=c.complaint_id) }}"
+                   class="btn-primary-custom" style="padding:8px 14px;font-size:12px;">
+                  View Details
+                </a>
+                {% if c.status != 'draft' %}
+                <a href="{{ url_for('main.download_receipt', complaint_id=c.complaint_id) }}"
+                   class="btn-ghost" style="padding:8px 12px;font-size:12px;min-width:74px;text-align:center;">
+                  Receipt
+                </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if pagination is defined and pagination.pages > 1 %}
+    <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
+      <div class="small text-muted">
+        Showing {{ pagination.items|length }} of {{ pagination.total }} complaints
+      </div>
+      <div class="d-flex gap-2">
+        {% if pagination.has_prev %}
+          <a href="{{ url_for('main.complaint_history', page=pagination.prev_num, search=request.args.get('search',''), status=request.args.get('status','all'), category=request.args.get('category','all')) }}" class="btn-ghost">Previous</a>
+        {% endif %}
+        {% if pagination.has_next %}
+          <a href="{{ url_for('main.complaint_history', page=pagination.next_num, search=request.args.get('search',''), status=request.args.get('status','all'), category=request.args.get('category','all')) }}" class="btn-ghost">Next</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  {% else %}
+    <div class="text-center text-muted py-4">
+      No complaints found for the selected filters.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

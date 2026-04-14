@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Complaint' if edit_mode else 'File Complaint' }} - BSPHCL Portal{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <div class="card p-4">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+        <div>
+          <h4 class="fw-800 mb-1">{{ 'Edit Complaint' if edit_mode else 'File Complaint' }}</h4>
+          <p class="text-muted mb-0">Provide accurate details for routing and resolution.</p>
+        <div class="small text-muted mb-3">Complaint ID will be generated automatically after successful submission.</div>
+        <div class="flash-alert flash-info" style="margin-top:10px;">
+          Provide accurate details for proper verification and timely resolution of the complaint.
+        </div>
+        <p style="display:none;"></p>
+        </div>
+        {% if edit_mode %}<span class="badge-status badge-pending">Editable before review</span>{% endif %}
+      </div>
+      <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label">Subject *</label><input type="text" name="subject" class="form-control-custom" required value="{{ form_data.subject if edit_mode else form_data.get('subject','') }}"></div>
+          <div class="col-md-6"><label class="form-label">Category *</label><select name="category" class="form-control-custom" {% if edit_mode %}disabled{% endif %} required><option value="">Select category</option>{% for val, label in categories %}<option value="{{ val }}" {% if (form_data.category if edit_mode else form_data.get('category')) == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>{% if edit_mode %}<input type="hidden" name="category" value="{{ complaint.category }}">{% endif %}</div>
+          <div class="col-md-6"><label class="form-label">Subcategory</label><input type="text" name="sub_category" class="form-control-custom" value="{{ form_data.sub_category if edit_mode else form_data.get('sub_category','') }}"></div>
+          <div class="col-md-6"><label class="form-label">Priority</label><select name="priority" class="form-control-custom">{% for val, label in priorities %}<option value="{{ val }}" {% if (form_data.priority if edit_mode else form_data.get('priority','medium')) == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+          <div class="col-md-6"><label class="form-label">Consumer Number *</label><input type="text" name="consumer_number" class="form-control-custom" required value="{{ complaint.consumer_number if edit_mode else current_user.consumer_number or '' }}"></div>
+          <div class="col-md-6"><label class="form-label">Meter Number</label><input type="text" name="meter_number" class="form-control-custom" value="{{ form_data.meter_number if edit_mode else form_data.get('meter_number','') }}"></div>
+          <div class="col-md-6"><label class="form-label">District</label><input type="text" name="district" class="form-control-custom" value="{{ form_data.district if edit_mode else form_data.get('district', (current_user.district.title() if current_user.district else '')) }}"></div>
+          <div class="col-md-6"><label class="form-label">Address</label><input type="text" name="address" class="form-control-custom" value="{{ form_data.address if edit_mode else form_data.get('address', current_user.address or '') }}"></div>
+          <div class="col-12"><label class="form-label">Description *</label><textarea name="description" class="form-control-custom" rows="5" required>{{ form_data.description if edit_mode else form_data.get('description','') }}</textarea></div>
+          {% if not edit_mode %}
+          <div class="col-12"><label class="form-label">Attachments</label><input type="file" name="attachments" class="form-control-custom" multiple accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"><div class="small text-muted mt-2">You may attach supporting documents. Allowed formats: PDF, JPG, PNG, DOC, DOCX. Maximum recommended file size: 2 MB per file.</div></div>
+          {% endif %}
+        </div>
+        <div class="form-group mt-3">
+            <div class="d-flex align-items-start gap-2">
+              <input type="checkbox" name="declaration" id="declaration" required style="margin-top:4px;accent-color:var(--primary);">
+              <label for="declaration" style="font-size:13px;color:var(--text-secondary);margin:0;">
+                I hereby confirm that the information provided is true and correct to the best of my knowledge.
+              </label>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 flex-wrap mt-3">
+            <button type="submit" class="btn-primary-custom">Submit Complaint</button>
+            <button type="reset" class="btn-ghost">Clear</button>
+          </div>
+        </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

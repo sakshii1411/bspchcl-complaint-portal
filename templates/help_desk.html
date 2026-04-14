@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Help Desk – BSPHCL Portal{% endblock %}
+{% block content %}
+<style>
+.helpdesk-bottom-space{
+  margin-bottom: 18px;
+}
+</style>
+<div class="row g-4">
+
+  <!-- Left Column -->
+  <div class="col-lg-8">
+
+    <!-- Complaint Tracker Card -->
+    <div class="card p-4 mb-4">
+      <div class="d-flex align-items-center gap-3 mb-1">
+        <div style="width:44px;height:44px;border-radius:12px;background:#EEF2FF;
+                    display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🔍</div>
+        <div>
+          <h4 class="fw-800 mb-0">Help Desk</h4>
+          <p class="text-muted mb-0" style="font-size:13px;">Use this section to track complaints, view guidance, and access support information.</p>
+        </div>
+      </div>
+
+      <hr style="margin:16px 0 20px;">
+
+      <div class="fw-700 mb-1" style="font-size:14px;">Track Your Complaint</div>
+      <p class="text-muted mb-3" style="font-size:13px;">Enter your Complaint ID and Consumer Number to check the current status.</p>
+
+      <form method="POST" action="{{ url_for('main.track_complaint') }}" class="row g-3">
+        <div class="col-md-5">
+          <label class="form-label">Complaint ID</label>
+          <input type="text" name="complaint_id" class="form-control-custom"
+                 placeholder="CMP-2026-12345" autocomplete="off"
+                 value="{{ request.form.get('complaint_id', '') if request.method == 'POST' else '' }}">
+        </div>
+        <div class="col-md-5">
+          <label class="form-label">Consumer Number</label>
+          <input type="text" name="consumer_number" class="form-control-custom"
+                 placeholder="BSPHCL-XXXXXXXXXX" autocomplete="off"
+                 value="{{ request.form.get('consumer_number', '') if request.method == 'POST' else '' }}">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn-primary-custom w-100 justify-content-center">Track</button>
+        </div>
+      </form>
+
+      {% if not_found %}
+      <div class="flash-alert flash-danger mt-3" style="margin-bottom:0;">
+        ❌ No complaint found for the entered Complaint ID and Consumer Number. Please check and try again.
+      </div>
+      {% endif %}
+
+      {% if tracked_complaint %}
+      <div style="margin-top:20px;border:1.5px solid #E5E7EB;border-radius:14px;padding:20px;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <div class="fw-700" style="font-size:15px;">Tracking Result</div>
+          <div class="d-flex gap-2 flex-wrap">
+            <span class="complaint-id-pill">{{ tracked_complaint.complaint_id }}</span>
+            <span class="badge-status badge-{{ tracked_complaint.status }}">{{ tracked_complaint.get_status_label() }}</span>
+          </div>
+        </div>
+        <div class="mb-2"><span class="text-muted" style="font-size:13px;">Subject: </span><span style="font-size:14px;font-weight:600;">{{ tracked_complaint.subject }}</span></div>
+        <div class="mb-2"><span class="text-muted" style="font-size:13px;">Category: </span><span style="font-size:13px;">{{ tracked_complaint.get_category_label() }}</span></div>
+        <div class="mb-2"><span class="text-muted" style="font-size:13px;">Filed on: </span><span style="font-size:13px;">{{ tracked_complaint.created_at.strftime('%d %b %Y, %I:%M %p') }}</span></div>
+        <div><span class="text-muted" style="font-size:13px;">Expected resolution: </span>
+          <span style="font-size:13px;{% if tracked_complaint.is_overdue %}color:#EF4444;font-weight:600;{% endif %}">
+            {{ tracked_complaint.expected_resolution_date.strftime('%d %b %Y') if tracked_complaint.expected_resolution_date else 'To be updated' }}
+            {% if tracked_complaint.is_overdue %} ⚠️ Overdue{% endif %}
+          </span>
+        </div>
+        {% if tracked_complaint.resolution_summary %}
+        <div class="mt-3 p-3" style="background:#F0FDF4;border-radius:10px;border:1px solid #BBF7D0;">
+          <div class="fw-600" style="font-size:13px;color:#166534;margin-bottom:4px;">✅ Resolution Summary</div>
+          <div style="font-size:13px;color:#166534;">{{ tracked_complaint.resolution_summary }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Progress Steps -->
+        <div class="mt-3 pt-3" style="border-top:1px solid #E5E7EB;">
+          <div class="fw-600 mb-2" style="font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#9CA3AF;">Progress</div>
+          <div class="d-flex align-items-center" style="flex-wrap:nowrap;overflow-x:auto;gap:0;">
+            {% for label, step in tracked_complaint.progress_steps %}
+              <div style="display:flex;align-items:center;flex-shrink:0;">
+                <div style="text-align:center;min-width:64px;">
+                  <div style="width:28px;height:28px;border-radius:50%;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
+                    {% if tracked_complaint.current_step > step %}background:#6C4CF1;color:#fff;
+                    {% elif tracked_complaint.current_step == step %}background:#6C4CF1;color:#fff;box-shadow:0 0 0 3px rgba(108,76,241,.2);
+                    {% else %}background:#F3F4F6;color:#9CA3AF;border:1.5px solid #E5E7EB;{% endif %}">
+                    {% if tracked_complaint.current_step > step %}✓{% else %}{{ step }}{% endif %}
+                  </div>
+                  <div style="font-size:11px;{% if tracked_complaint.current_step >= step %}color:#6C4CF1;font-weight:600;{% else %}color:#9CA3AF;{% endif %}">{{ label }}</div>
+                </div>
+                {% if not loop.last %}
+                  <div style="height:2px;width:20px;flex-shrink:0;margin-bottom:16px;{% if tracked_complaint.current_step > step %}background:#6C4CF1;{% else %}background:#E5E7EB;{% endif %}"></div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- FAQ -->
+    <div class="card p-4 mb-4">
+      <h6 class="fw-700 mb-3">Frequently Asked Questions</h6>
+      <div class="mb-3">
+        <div class="fw-600" style="font-size:14px;">How do I file a complaint?</div>
+        <div class="text-muted small mt-1">Log in and go to File Complaint. Choose the correct category, add your consumer number, and describe the issue clearly. You will receive a Complaint ID by email.</div>
+      </div>
+      <div class="mb-3">
+        <div class="fw-600" style="font-size:14px;">Can a submitted complaint be edited?</div>
+        <div class="text-muted small mt-1">Yes, but only while the complaint is in <strong>Pending</strong> status. Once review begins, the complaint is locked to preserve the official record.</div>
+      </div>
+      <div class="mb-3">
+        <div class="fw-600" style="font-size:14px;">What documents should I attach for billing issues?</div>
+        <div class="text-muted small mt-1">Upload your latest bill copy, a meter photo if available, and a brief note describing the discrepancy.</div>
+      </div>
+      <div>
+        <div class="fw-600" style="font-size:14px;">When should the Safety Hazard category be selected?</div>
+        <div class="text-muted small mt-1">Use it for exposed wires, sparking equipment, fallen lines, or any situation posing immediate danger to people or property.</div>
+      </div>
+    </div>
+
+    <!-- Safety Guidance -->
+    <div class="card p-4" style="border-left:4px solid #EF4444;">
+      <h6 class="fw-700 mb-3" style="color:#EF4444;">⚠️ Safety &amp; Outage Guidance</h6>
+      <ul class="mb-0 text-muted" style="font-size:14px;line-height:1.9;">
+        <li>Never touch broken, hanging, or fallen power lines — keep bystanders away and call 1912 immediately.</li>
+        <li>Switch off appliances and unplug sensitive electronics during voltage fluctuations or storm outages.</li>
+        <li>Dial <strong>1912</strong> for urgent electricity failure and hazard reporting — available 24×7, toll-free.</li>
+        <li>Keep your Complaint ID and Consumer Number ready when contacting support for faster resolution.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Right Column -->
+  <div class="col-lg-4">
+    <div class="card p-4 mb-4">
+      <h6 class="fw-700 mb-3">📞 Consumer Support Information</h6>
+      <div class="py-2 border-bottom">
+        <div class="fw-600" style="font-size:13px;">Consumer Assistance</div>
+        <div class="small text-muted">Please contact your local electricity office for assistance.</div>
+      </div>
+      <div class="py-2 border-bottom">
+        <div class="fw-600" style="font-size:13px;">Complaint Tracking</div>
+        <div class="small text-muted">📞 Use the tracking section on this page for current complaint status.</div>
+      </div>
+      <div class="py-2">
+        <div class="fw-600" style="font-size:13px;">Required Information</div>
+        <div class="small text-muted">Keep your Complaint ID and Consumer Number ready while requesting support.</div>
+      </div>
+    </div>
+
+    <div class="card p-4">
+      <h6 class="fw-700 mb-3">🔗 Consumer Services</h6>
+      {% if current_user.is_authenticated and not current_user.is_staff %}
+        <a href="{{ url_for('main.new_complaint') }}" class="btn-primary-custom w-100 mb-2 justify-content-center">⚡ File Complaint</a>
+        <a href="{{ url_for('main.complaint_history') }}" class="btn-ghost w-100 justify-content-center">📋 Complaint History</a>
+      {% else %}
+        <a href="{{ url_for('main.login') }}" class="btn-primary-custom w-100 mb-2 justify-content-center">🔑 Login to File Complaint</a>
+        <a href="{{ url_for('main.register') }}" class="btn-ghost w-100 justify-content-center">📝 Create Account</a>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
