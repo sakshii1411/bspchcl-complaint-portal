@@ -1,71 +1,81 @@
-# BSPHCL Consumer Complaint Portal
+# ⚡ BSPHCL Consumer Complaint Portal
 
-A Flask-based complaint management portal designed to look and behave more like a real public utility support system than a classroom demo.
+A production-ready complaint management system built using Flask, designed to simulate a real-world public utility support platform.
 
-## Included in this final version
+---
 
-- realistic consumer dashboard and staff dashboard
-- complaint workflow with review, assignment, action, resolution, closure, reopen flow, and timeline logging
-- complaint assignment to department and staff member
-- expected resolution date and overdue tracking
-- internal remarks for staff only
-- consumer complaint tracking with progress steps
-- editable complaints only before review starts
-- multiple attachments
-- downloadable acknowledgement slip and resolution report
-- consumer satisfaction rating after closure
-- search by complaint ID and consumer number
-- staff roles: super admin, operator, complaint officer, field staff
-- bulk status update and assignment
-- Excel and PDF export
-- district-wise and category-wise analytics with charts
-- email-ready OTP and status notification hooks
-- CSRF token protection for forms
-- safer config using environment variables
-- seed script for demo accounts and sample complaints
+## 🚀 Live Demo
 
-## Tech stack
+🔗 https://bsphcl-complaint-portal.onrender.com
 
-- Flask
-- Flask-SQLAlchemy
-- Flask-Login
-- Flask-Mail
-- Flask-Migrate
-- SQLite by default
-- Chart.js
-- Bootstrap 5
-- ReportLab
-- OpenPyXL
+---
 
-## Project structure
+## ✨ Features
+
+* Consumer and Admin dashboards
+* Complaint lifecycle management:
+
+  * Submit → Review → Assign → Resolve → Close → Reopen
+* Complaint assignment to departments and staff
+* Priority-based complaint handling
+* Complaint tracking using Complaint ID + Consumer Number
+* Timeline logging and status updates
+* Internal staff remarks (admin only)
+* File attachments (PDF, JPG, DOC, etc.)
+* Downloadable acknowledgement slip & reports
+* Consumer satisfaction rating system
+* Search and filter complaints
+* Role-based access:
+
+  * Super Admin
+  * Complaint Officer
+  * Operator
+  * Field Staff
+* Excel & PDF export
+* Data analytics (district/category-wise charts)
+* CSRF protection & secure forms
+* Environment-based configuration
+
+---
+
+## 🛠️ Tech Stack
+
+* **Backend:** Flask, Flask-SQLAlchemy, Flask-Login
+* **Database:** PostgreSQL (Production), SQLite (Local)
+* **Frontend:** HTML, Bootstrap 5, Chart.js
+* **Others:** Flask-Mail, ReportLab, OpenPyXL
+
+---
+
+## 📂 Project Structure
 
 ```
 app.py
-run.py
+config.py
 models.py
 main_routes.py
 admin_routes.py
 utils.py
-config.py
 init_db.py
 static/
 templates/
 ```
 
-## Demo credentials
+---
 
-After running `python init_db.py`:
+## 👤 Admin Access
 
-### Staff
-- admin@bsphcl.gov.in / Admin@2024
-- officer@bsphcl.gov.in / Admin@2024
-- operator@bsphcl.gov.in / Admin@2024
-- field@bsphcl.gov.in / Admin@2024
+```
+Email: admin@bsphcl.gov.in
+Password: Admin@2024
+```
 
-### Consumer
-- consumer@example.com / Consumer@2024
+👉 Only one admin is pre-created
+👉 Consumers can register directly from the website
 
-## Run locally
+---
+
+## ⚙️ Run Locally
 
 ```bash
 pip install -r requirements.txt
@@ -79,19 +89,60 @@ Open:
 http://127.0.0.1:5001
 ```
 
-## Mail / OTP setup
+---
 
-1. copy `.env.example` to `.env`
-2. add your SMTP email and app password
-3. restart the app
+## 🌐 Deployment (Render)
 
-If mail is not configured, OTP is still generated and printed in the server console for local testing.
+This project is deployed using:
 
-## Deployment
+* **Render Web Service**
+* **Gunicorn (Production Server)**
+* **Environment Variables for configuration**
+* **Automatic DB initialization on deploy**
 
-This project can be deployed on Render or PythonAnywhere.
+---
 
-## Notes
+## 🔐 Environment Variables
 
-- the included database is not required; `init_db.py` can recreate everything
-- this project is structured for internship/demo/viva presentation and can be extended further with WhatsApp/SMS gateways, live OTP verification for mobile change, and automated escalation jobs
+```
+SECRET_KEY=your-secret-key
+ADMIN_SECRET_CODE=your-admin-code
+DATABASE_URL=your-postgresql-url
+MAIL_USERNAME=your-email
+MAIL_PASSWORD=your-app-password
+```
+
+---
+
+## 📌 Notes
+
+* Database is auto-created using `init_db.py`
+* Works with both SQLite (local) and PostgreSQL (production)
+* Designed for:
+
+  * Internship projects
+  * College submissions
+  * Real-world system simulation
+
+---
+
+## 🚀 Future Enhancements
+
+* OTP-based login via mobile
+* WhatsApp/SMS integration
+* Automated complaint escalation system
+* Real-time notifications
+* AI-based complaint categorization
+
+---
+
+## 📣 Conclusion
+
+This project demonstrates a complete full-stack system including:
+
+* Backend logic
+* Frontend UI
+* Database integration
+* Deployment pipeline
+
+👉 Built to simulate a **real government complaint portal system**
