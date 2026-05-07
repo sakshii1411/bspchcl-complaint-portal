@@ -1,108 +1,115 @@
-# ⚡ BSPHCL Consumer Complaint Portal
+<div align="center">
 
-A production-ready complaint management system built using Flask, designed to simulate a real-world public utility support platform.
+<h1>⚡ BSPHCL Consumer Complaint Portal</h1>
 
----
+<p>A production-ready complaint management system built for Bihar State Power Holding Company Ltd.</p>
 
-## 🚀 Live Demo
+[![Live Demo](https://img.shields.io/badge/LIVE%20DEMO-Visit%20Portal-brightgreen?style=for-the-badge&logo=render&logoColor=white)](https://bsphcl-complaint-portal.onrender.com)
 
-🔗 https://bsphcl-complaint-portal.onrender.com
+![Flask](https://img.shields.io/badge/Flask-000000?style=flat-square&logo=flask&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap%205-7952B3?style=flat-square&logo=bootstrap&logoColor=white)
+![Render](https://img.shields.io/badge/Deployed%20on-Render-46E3B7?style=flat-square&logo=render&logoColor=white)
 
----
-
-## ✨ Features
-
-* Consumer and Admin dashboards
-* Complaint lifecycle management:
-
-  * Submit → Review → Assign → Resolve → Close → Reopen
-* Complaint assignment to departments and staff
-* Priority-based complaint handling
-* Complaint tracking using Complaint ID + Consumer Number
-* Timeline logging and status updates
-* Internal staff remarks (admin only)
-* File attachments (PDF, JPG, DOC, etc.)
-* Downloadable acknowledgement slip & reports
-* Consumer satisfaction rating system
-* Search and filter complaints
-* Role-based access:
-
-  * Super Admin
-  * Complaint Officer
-  * Operator
-  * Field Staff
-* Excel & PDF export
-* Data analytics (district/category-wise charts)
-* CSRF protection & secure forms
-* Environment-based configuration
+</div>
 
 ---
 
-## 🛠️ Tech Stack
+## About
 
-* **Backend:** Flask, Flask-SQLAlchemy, Flask-Login
-* **Database:** PostgreSQL (Production), SQLite (Local)
-* **Frontend:** HTML, Bootstrap 5, Chart.js
-* **Others:** Flask-Mail, ReportLab, OpenPyXL
+A full-stack complaint management portal built during an internship at **Bihar State Power Holding Company Ltd. (BSPHCL)**. The system handles the complete complaint lifecycle — from submission by consumers to resolution by staff — with role-based access, analytics, and PDF/Excel exports.
 
 ---
 
-## 📂 Project Structure
+## Live Demo
+
+**URL:** https://bsphcl-complaint-portal.onrender.com
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@bsphcl.gov.in | Admin@2024 |
+| Consumer | Register directly on the website | — |
+
+---
+
+## Features
+
+**Consumer Side**
+- Register and submit complaints with file attachments
+- Track complaint status using Complaint ID + Consumer Number
+- Download acknowledgement slip
+- Rate satisfaction after resolution
+
+**Admin Side**
+- Role-based access: Super Admin, Complaint Officer, Operator, Field Staff
+- Full complaint lifecycle: Submit → Review → Assign → Resolve → Close → Reopen
+- Priority-based handling and department assignment
+- Internal staff remarks and timeline logging
+- Search, filter, and export complaints to Excel and PDF
+- Analytics dashboard with district/category-wise charts (Chart.js)
+
+**Security**
+- OTP-based authentication
+- CSRF protection
+- Secure environment-based configuration
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Flask, Flask-SQLAlchemy, Flask-Login, Flask-Mail |
+| Database | PostgreSQL (Production), SQLite (Local) |
+| Frontend | HTML5, Bootstrap 5, Chart.js |
+| Exports | ReportLab (PDF), OpenPyXL (Excel) |
+| Deployment | Render, Gunicorn |
+
+---
+
+## Project Structure
 
 ```
-app.py
-config.py
-models.py
-main_routes.py
-admin_routes.py
-utils.py
-init_db.py
-static/
-templates/
+app.py              # App factory
+config.py           # Environment configuration
+models.py           # Database models (6+ tables)
+main_routes.py      # Consumer routes
+admin_routes.py     # Admin routes
+utils.py            # Helper functions
+init_db.py          # DB initialization
+static/             # CSS, JS, images
+templates/          # HTML templates
 ```
 
 ---
 
-## 👤 Admin Access
-
-```
-Email: admin@bsphcl.gov.in
-Password: Admin@2024
-```
-
-👉 Only one admin is pre-created
-👉 Consumers can register directly from the website
-
----
-
-## ⚙️ Run Locally
+## Run Locally
 
 ```bash
+# Clone the repo
+git clone https://github.com/sakshii1411/bspchcl-complaint-portal.git
+cd bspchcl-complaint-portal
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Set environment variables
+cp .env.example .env
+# Edit .env with your values
+
+# Initialize database
 python init_db.py
+
+# Run the app
 python run.py
 ```
 
-Open:
-
-```
-http://127.0.0.1:5001
-```
+Open: http://127.0.0.1:5001
 
 ---
 
-## 🌐 Deployment (Render)
-
-This project is deployed using:
-
-* **Render Web Service**
-* **Gunicorn (Production Server)**
-* **Environment Variables for configuration**
-* **Automatic DB initialization on deploy**
-
----
-
-## 🔐 Environment Variables
+## Environment Variables
 
 ```
 SECRET_KEY=your-secret-key
@@ -114,35 +121,29 @@ MAIL_PASSWORD=your-app-password
 
 ---
 
-## 📌 Notes
+## Deployment
 
-* Database is auto-created using `init_db.py`
-* Works with both SQLite (local) and PostgreSQL (production)
-* Designed for:
-
-  * Internship projects
-  * College submissions
-  * Real-world system simulation
-
----
-
-## 🚀 Future Enhancements
-
-* OTP-based login via mobile
-* WhatsApp/SMS integration
-* Automated complaint escalation system
-* Real-time notifications
-* AI-based complaint categorization
+Deployed on **Render** using:
+- Render Web Service
+- Gunicorn as production server
+- PostgreSQL add-on for database
+- Environment variables for secrets
+- Automatic DB initialization on deploy
 
 ---
 
-## 📣 Conclusion
+## Future Enhancements
 
-This project demonstrates a complete full-stack system including:
+- OTP-based login via mobile number
+- WhatsApp/SMS integration for status updates
+- Automated complaint escalation system
+- Real-time notifications
+- AI-based complaint categorization
 
-* Backend logic
-* Frontend UI
-* Database integration
-* Deployment pipeline
+---
 
-👉 Built to simulate a **real government complaint portal system**
+<div align="center">
+
+Built by [Sakshi Awasthi](https://github.com/sakshii1411) during internship at BSPHCL, Jun–Jul 2025
+
+</div>
