@@ -63,6 +63,26 @@ def create_app(config_class=Config):
         return render_template('errors/500.html', error_code=500, error_title='Something Went Wrong',
                                custom_message='An unexpected server error occurred. Our team has been notified.'), 500
 
+    # ── ONE-TIME SEED ROUTE (auto-removed after use) ──────────────────────────
+    SEED_TOKEN = '8e22a6de5d9c73e78af9d017279ec2bcc0de071877e61204'
+
+    @app.route(f'/internal/seed/{SEED_TOKEN}')
+    def run_seed():
+        from flask import jsonify
+        already = db.session.execute(db.text("SELECT COUNT(*) FROM complaints")).scalar()
+        if already and already > 10:
+            return jsonify({"status": "skipped", "reason": f"{already} complaints already exist"}), 200
+        try:
+            import seed_demo
+            seed_demo.seed()
+            total = db.session.execute(db.text("SELECT COUNT(*) FROM complaints")).scalar()
+            users = db.session.execute(db.text("SELECT COUNT(*) FROM users")).scalar()
+            return jsonify({"status": "success", "complaints": total, "users": users}), 200
+        except Exception as e:
+            import traceback
+            return jsonify({"status": "error", "message": str(e),
+                            "trace": traceback.format_exc()}), 500
+
     return app
 
 
