@@ -3,141 +3,181 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Register – BSPHCL Consumer Portal</title>
+  <title>Consumer Registration – BSPHCL Portal</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
   <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet"/>
 </head>
 <body>
-<div class="auth-wrapper">
-  <div class="auth-card fade-in" style="max-width:980px;">
 
-    <!-- Left Panel -->
-    <div class="auth-left">
-      <div class="auth-left-brand">
-        <div class="brand-icon-auth">⚡</div>
-        <span class="brand-name-auth">BSPHCL</span>
+<div style="background:#8B1A1A;color:#fff;text-align:center;padding:5px;font-size:11.5px;font-weight:600;letter-spacing:0.3px;">
+  Government of Bihar &nbsp;|&nbsp; Official Website
+</div>
+
+<div class="auth-wrapper" style="background:#f0f0f0;align-items:flex-start;padding-top:24px;padding-bottom:24px;">
+  <div class="auth-card fade-in" style="max-width:980px;border-radius:4px;">
+
+    <div class="auth-card-header">
+      <div class="gov-logo">⚡</div>
+      <div class="gov-title">
+        <div class="hi">बिहार स्टेट पॉवर होल्डिंग कं. लि.</div>
+        <div class="en">Bihar State Power Holding Company Limited</div>
       </div>
-      <div class="auth-left-content">
-        <div class="auth-badge">🏛️ Official Consumer Portal</div>
-        <h1>Join Bihar's<br/>Power Grid<br/>Community.</h1>
-        <p>Register to file complaints, track complaint status, and access consumer service-related information.</p>
-      </div>
-      <div class="auth-left-footer">
-        <div class="version-tag">Bihar State Power Holding Company Limited</div>
+      <div style="margin-left:auto;text-align:right;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);">Consumer Services</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.8);font-weight:600;">New Registration</div>
       </div>
     </div>
 
-    <!-- Right Panel -->
-    <div class="auth-right" style="padding:32px 36px;overflow-y:auto;">
-      <h2>Consumer Registration</h2>
-      <p class="auth-subtitle">Enter the required details to register as a consumer.</p>
-
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% for category, message in messages %}
-          <div class="flash-alert flash-{{ category }}">{{ message }}</div>
-        {% endfor %}
-      {% endwith %}
-
-      <form method="POST" action="{{ url_for('main.register') }}" class="show-loading">
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <div class="form-group">
-              <label class="form-label">Full Name *</label>
-              <div class="input-icon-wrap">
-                <span class="input-icon"><i class="bi bi-person"></i></span>
-                <input type="text" name="name" class="form-control-custom"
-                       placeholder="Rajesh Kumar" required
-                       value="{{ form_data.get('name','') }}"/>
-              </div>
+    <div class="auth-card-body">
+      <!-- Left Panel -->
+      <div class="auth-left">
+        <div class="auth-left-content">
+          <div class="auth-badge"><i class="bi bi-person-plus-fill"></i> Consumer Registration</div>
+          <h1>Register as a BSPHCL Consumer</h1>
+          <p>Create your account to file complaints, track their status, and manage your electricity service requests online.</p>
+          <div class="auth-info-list">
+            <div class="auth-info-item">
+              <i class="bi bi-info-circle-fill" style="color:#93c5fd;"></i>
+              Keep your Consumer Number handy
             </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-group">
-              <label class="form-label">Email Address *</label>
-              <div class="input-icon-wrap">
-                <span class="input-icon"><i class="bi bi-envelope"></i></span>
-                <input type="email" name="email" class="form-control-custom"
-                       placeholder="you@email.com" required
-                       value="{{ form_data.get('email','') }}"/>
-              </div>
+            <div class="auth-info-item">
+              <i class="bi bi-info-circle-fill" style="color:#93c5fd;"></i>
+              Use a valid email for OTP and updates
             </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-group">
-              <label class="form-label">Mobile Number *</label>
-              <div class="input-icon-wrap">
-                <span class="input-icon"><i class="bi bi-phone"></i></span>
-                <input type="tel" name="mobile" class="form-control-custom"
-                       placeholder="10-digit mobile number" required
-                       pattern="[6-9][0-9]{9}" maxlength="10"
-                       value="{{ form_data.get('mobile','') }}"/>
-              </div>
+            <div class="auth-info-item">
+              <i class="bi bi-info-circle-fill" style="color:#93c5fd;"></i>
+              Mobile number must be 10 digits
             </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-group">
-              <label class="form-label">District</label>
-              <div class="input-icon-wrap">
-                <span class="input-icon"><i class="bi bi-geo-alt"></i></span>
-                <input type="text" name="district" class="form-control-custom"
-                       placeholder="e.g. Patna"
-                       value="{{ form_data.get('district','') }}"/>
-              </div>
-            </div>
-          </div>
-          <div class="col-12">
-            <div class="form-group">
-              <label class="form-label">Address</label>
-              <textarea name="address" class="form-control-custom" rows="2"
-                        placeholder="Your full address">{{ form_data.get('address','') }}</textarea>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-group">
-              <label class="form-label">Password *</label>
-              <div class="input-icon-wrap">
-                <span class="input-icon"><i class="bi bi-lock"></i></span>
-                <input type="password" name="password" id="reg-password" class="form-control-custom"
-                       placeholder="Min. 8 characters" required minlength="8"/>
-                <span class="input-icon-right toggle-password" data-target="reg-password" style="cursor:pointer;"><<i class="bi bi-eye"></i></span>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-group">
-              <label class="form-label">Confirm Password *</label>
-              <div class="input-icon-wrap">
-                <span class="input-icon"><i class="bi bi-lock-fill"></i></span>
-                <input type="password" name="confirm_password" id="confirm-pw" class="form-control-custom"
-                       placeholder="Repeat password" required minlength="8"/>
-                <span class="input-icon-right toggle-password" data-target="confirm-pw" style="cursor:pointer;"><<i class="bi bi-eye"></i></span>
-              </div>
+            <div class="auth-info-item">
+              <i class="bi bi-info-circle-fill" style="color:#93c5fd;"></i>
+              Password minimum 8 characters
             </div>
           </div>
         </div>
-
-        <div class="d-flex align-items-start gap-2 my-3">
-          <input type="checkbox" name="terms" id="terms" required style="margin-top:3px;accent-color:var(--primary);"/>
-          <label for="terms" style="font-size:12.5px;color:var(--text-secondary);">
-            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
-          </label>
+        <div class="auth-left-footer">
+          <div class="version-tag">© 2026 Bihar State Power Holding Company Limited</div>
         </div>
+      </div>
 
-        <button type="submit" class="btn-primary-custom w-100 justify-content-center" style="padding:12px;">
-          Consumer Registration &nbsp;<i class="bi bi-arrow-right"></i>
-        </button>
+      <!-- Right Panel -->
+      <div class="auth-right" style="padding:28px 32px;overflow-y:auto;">
+        <h2>Consumer Registration</h2>
+        <p class="auth-subtitle">Fill in the details below to create your consumer account.</p>
 
-        <div class="text-center mt-3" style="font-size:13px;color:var(--text-muted);">
-          Already have an account?
-          <a href="{{ url_for('main.login') }}" class="text-primary fw-600">Sign In</a>
-        </div>
-      </form>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for category, message in messages %}
+            <div class="flash-alert flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('main.register') }}" class="show-loading">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <div class="input-icon-wrap">
+                  <span class="input-icon"><i class="bi bi-person"></i></span>
+                  <input type="text" name="name" class="form-control-custom"
+                         placeholder="As per official records" required
+                         value="{{ form_data.get('name','') }}"/>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="form-label">Email Address *</label>
+                <div class="input-icon-wrap">
+                  <span class="input-icon"><i class="bi bi-envelope"></i></span>
+                  <input type="email" name="email" class="form-control-custom"
+                         placeholder="you@email.com" required
+                         value="{{ form_data.get('email','') }}"/>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="form-label">Mobile Number *</label>
+                <div class="input-icon-wrap">
+                  <span class="input-icon"><i class="bi bi-phone"></i></span>
+                  <input type="tel" name="mobile" class="form-control-custom"
+                         placeholder="10-digit mobile number" required
+                         pattern="[6-9][0-9]{9}" maxlength="10"
+                         value="{{ form_data.get('mobile','') }}"/>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="form-label">District</label>
+                <div class="input-icon-wrap">
+                  <span class="input-icon"><i class="bi bi-geo-alt"></i></span>
+                  <input type="text" name="district" class="form-control-custom"
+                         placeholder="e.g. Patna"
+                         value="{{ form_data.get('district','') }}"/>
+                </div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-group">
+                <label class="form-label">Address</label>
+                <textarea name="address" class="form-control-custom" rows="2"
+                          placeholder="Full residential address">{{ form_data.get('address','') }}</textarea>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="form-label">Password *</label>
+                <div class="input-icon-wrap">
+                  <span class="input-icon"><i class="bi bi-lock"></i></span>
+                  <input type="password" name="password" id="reg-password" class="form-control-custom"
+                         placeholder="Minimum 8 characters" required minlength="8"/>
+                  <span class="input-icon-right toggle-password" data-target="reg-password" style="cursor:pointer;"><i class="bi bi-eye"></i></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="form-label">Confirm Password *</label>
+                <div class="input-icon-wrap">
+                  <span class="input-icon"><i class="bi bi-lock-fill"></i></span>
+                  <input type="password" name="confirm_password" id="confirm-pw" class="form-control-custom"
+                         placeholder="Repeat password" required minlength="8"/>
+                  <span class="input-icon-right toggle-password" data-target="confirm-pw" style="cursor:pointer;"><i class="bi bi-eye"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-start gap-2 my-3">
+            <input type="checkbox" name="terms" id="terms" required style="margin-top:3px;accent-color:var(--navy);"/>
+            <label for="terms" style="font-size:12.5px;color:var(--text-secondary);">
+              I hereby declare that the information provided is true and correct, and I agree to the
+              <a href="#" style="color:var(--navy);">Terms of Service</a> and
+              <a href="#" style="color:var(--navy);">Privacy Policy</a> of BSPHCL Consumer Portal.
+            </label>
+          </div>
+
+          <button type="submit" class="btn-primary-custom w-100 justify-content-center" style="padding:11px;">
+            Submit Registration &nbsp;<i class="bi bi-arrow-right"></i>
+          </button>
+
+          <div class="text-center mt-3" style="font-size:13px;color:var(--text-muted);">
+            Already registered?
+            <a href="{{ url_for('main.login') }}" style="color:var(--navy);font-weight:600;">Sign In Here</a>
+          </div>
+        </form>
+      </div>
     </div>
 
   </div>
 </div>
+
+<div style="text-align:center;padding:10px;font-size:11px;color:#888;">
+  For technical assistance, contact your nearest BSPHCL office &nbsp;|&nbsp; Vigilance Helpline: 0612-2505559
+</div>
+
 <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </body>
 </html>

@@ -2,51 +2,51 @@
 {% block title %}Consumer Dashboard – BSPHCL Portal{% endblock %}
 
 {% block content %}
+<div class="page-header">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+      <h4>Consumer Services Dashboard</h4>
+      <p class="text-muted">Welcome, {{ current_user.name }}. Use this portal to file complaints and track their status.</p>
+    </div>
+    <a href="{{ url_for('main.new_complaint') }}" class="btn-primary-custom">
+      <i class="bi bi-plus-circle"></i> File New Complaint
+    </a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-6">
+    <div class="stat-card primary">
+      <div class="stat-number">{{ total }}</div>
+      <div class="stat-label">Total Complaints</div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="stat-card warning">
+      <div class="stat-number">{{ pending }}</div>
+      <div class="stat-label">Pending</div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="stat-card info">
+      <div class="stat-number">{{ reviewing if reviewing > 0 else "—" }}</div>
+      <div class="stat-label">In Progress</div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="stat-card success">
+      <div class="stat-number">{{ resolved + closed }}</div>
+      <div class="stat-label">Disposed</div>
+    </div>
+  </div>
+</div>
+
 <div class="row g-4">
   <div class="col-lg-8">
-    <div class="card p-4 mb-4">
-      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-        <div>
-          <h4 class="fw-800 mb-2">Consumer Services Dashboard</h4>
-          <p class="text-muted mb-2" style="font-size:13px;">
-            Use this portal to file complaints, track complaint status, and access complaint-related records.
-          </p>
-          <div class="small text-muted">Last login: {{ current_user.last_login.strftime('%d %b %Y, %I:%M %p') if current_user.last_login else 'Not available' }}</div>
-        </div>
-        </div>
-      </div>
-
-    <div class="row g-3 mb-4">
-      <div class="col-md-3 col-6">
-        <div class="stat-card primary">
-          <div class="stat-number">{{ total }}</div>
-          <div class="stat-label">Total Complaints</div>
-        </div>
-      </div>
-      <div class="col-md-3 col-6">
-        <div class="stat-card warning">
-          <div class="stat-number">{{ pending }}</div>
-          <div class="stat-label">Pending</div>
-        </div>
-      </div>
-      <div class="col-md-3 col-6">
-        <div class="stat-card info">
-          <div class="stat-number">{{ reviewing if reviewing > 0 else "-" }}</div>
-          <div class="stat-label">In Progress</div>
-        </div>
-      </div>
-      <div class="col-md-3 col-6">
-        <div class="stat-card success">
-          <div class="stat-number">{{ resolved + closed }}</div>
-          <div class="stat-label">Disposed</div>
-        </div>
-      </div>
-    </div>
-
     <div class="card p-4">
       <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <h5 class="fw-700 mb-0">Recent Complaint Records</h5>
-        <a href="{{ url_for('main.complaint_history') }}" class="btn-ghost" style="padding:7px 12px;">View Records</a>
+        <h5 class="fw-700 mb-0" style="color:var(--navy-dark);">Recent Complaint Records</h5>
+        <a href="{{ url_for('main.complaint_history') }}" class="btn-ghost" style="padding:6px 12px;font-size:12.5px;">View All Records</a>
       </div>
 
       {% if recent %}
@@ -54,25 +54,25 @@
           <table class="bsp-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>SUBJECT</th>
-                <th>STATUS</th>
-                <th>PRIORITY</th>
-                <th>DATE</th>
-                <th>ACTION</th>
+                <th>Complaint ID</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Date</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {% for c in recent %}
               <tr>
-                <td style="white-space:nowrap;"><span class="text-primary fw-600">{{ c.complaint_id }}</span></td>
+                <td><span style="font-family:monospace;font-weight:600;color:var(--navy);">{{ c.complaint_id }}</span></td>
                 <td>{{ c.subject }}</td>
                 <td><span class="badge-status badge-{{ c.status }}">{{ c.get_status_label() }}</span></td>
                 <td><span class="badge-priority {{ c.priority }}">{{ c.get_priority_label() }}</span></td>
                 <td style="font-size:12px;color:var(--text-muted);white-space:nowrap;">{{ c.created_at.strftime('%d %b %Y') }}</td>
                 <td>
                   <a href="{{ url_for('main.complaint_detail', complaint_id=c.complaint_id) }}"
-                       class="btn-ghost" style="padding:6px 12px;font-size:12px;white-space:nowrap;min-width:96px;text-align:center;display:inline-block;">View Details</a>
+                     class="btn-ghost" style="padding:5px 10px;font-size:12px;">View</a>
                 </td>
               </tr>
               {% endfor %}
@@ -80,39 +80,42 @@
           </table>
         </div>
       {% else %}
-        <div class="text-muted">No complaint records available.</div>
+        <div class="text-center py-4" style="color:var(--text-muted);">
+          <i class="bi bi-inbox" style="font-size:32px;display:block;margin-bottom:8px;opacity:0.4;"></i>
+          No complaint records found. <a href="{{ url_for('main.new_complaint') }}" style="color:var(--navy);">File your first complaint</a>.
+        </div>
       {% endif %}
     </div>
   </div>
 
   <div class="col-lg-4">
     <div class="card p-4 mb-4">
-      <h5 class="fw-700 mb-3">Complaint Status Summary</h5>
-      <div style="height:220px;position:relative;">
+      <h5 class="fw-700 mb-3" style="color:var(--navy-dark);">Complaint Status Summary</h5>
+      <div style="height:200px;position:relative;">
         <canvas id="consumerStatusChart"></canvas>
       </div>
       <div class="mt-3">
         <div class="d-flex justify-content-between py-2 border-bottom">
-          <span class="text-muted">Total Complaints</span>
-          <span class="fw-600">{{ total }}</span>
+          <span class="text-muted" style="font-size:13px;">Total</span>
+          <span class="fw-700">{{ total }}</span>
         </div>
         <div class="d-flex justify-content-between py-2 border-bottom">
-          <span class="text-muted">Pending</span>
-          <span class="fw-600">{{ pending }}</span>
+          <span class="text-muted" style="font-size:13px;">Pending</span>
+          <span class="fw-700">{{ pending }}</span>
         </div>
         <div class="d-flex justify-content-between py-2 border-bottom">
-          <span class="text-muted">In Progress</span>
-          <span class="fw-600">{{ reviewing }}</span>
+          <span class="text-muted" style="font-size:13px;">In Progress</span>
+          <span class="fw-700">{{ reviewing }}</span>
         </div>
         <div class="d-flex justify-content-between py-2">
-          <span class="text-muted">Disposed</span>
-          <span class="fw-600">{{ resolved + closed }}</span>
+          <span class="text-muted" style="font-size:13px;">Disposed</span>
+          <span class="fw-700">{{ resolved + closed }}</span>
         </div>
       </div>
     </div>
 
     <div class="card p-4">
-      <h5 class="fw-700 mb-3">Service Notifications</h5>
+      <h5 class="fw-700 mb-3" style="color:var(--navy-dark);">Service Notifications</h5>
       {% if notifs %}
         {% for n in notifs %}
           <div class="py-2 border-bottom">
@@ -122,7 +125,7 @@
           </div>
         {% endfor %}
       {% else %}
-        <div class="text-muted">No new service notifications available at this time.</div>
+        <div class="text-muted" style="font-size:13px;">No new notifications at this time.</div>
       {% endif %}
     </div>
   </div>
@@ -134,29 +137,24 @@
 document.addEventListener('DOMContentLoaded', function () {
   const ctx = document.getElementById('consumerStatusChart');
   if (!ctx) return;
-
   new Chart(ctx, {
     type: 'doughnut',
     data: {
       labels: ['Pending', 'In Progress', 'Disposed'],
       datasets: [{
         data: [{{ pending }}, {{ reviewing }}, {{ resolved + closed }}],
-        backgroundColor: ['#f59e0b', '#2563eb', '#16a34a'],
+        backgroundColor: ['#b56a00', '#1A3A5C', '#1a6b2e'],
         borderWidth: 0
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      cutout: '68%',
+      cutout: '65%',
       plugins: {
         legend: {
           position: 'bottom',
-          labels: {
-            boxWidth: 12,
-            boxHeight: 12,
-            padding: 14
-          }
+          labels: { boxWidth: 12, boxHeight: 12, padding: 12, font: { size: 12 } }
         }
       }
     }

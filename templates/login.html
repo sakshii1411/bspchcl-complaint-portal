@@ -9,86 +9,124 @@
   <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet"/>
 </head>
 <body>
-<div class="auth-wrapper">
-  <div class="auth-card fade-in">
 
-    <!-- Left Panel -->
-    <div class="auth-left">
-      <div class="auth-left-brand">
-        <div class="brand-icon-auth">⚡</div>
-        <span class="brand-name-auth">BSPHCL</span>
+<!-- Government top notice -->
+<div style="background:#8B1A1A;color:#fff;text-align:center;padding:5px;font-size:11.5px;font-weight:600;letter-spacing:0.3px;">
+  Government of Bihar &nbsp;|&nbsp; Official Website
+</div>
+
+<div class="auth-wrapper" style="background:#f0f0f0;">
+  <div class="auth-card fade-in" style="max-width:940px;border-radius:4px;">
+
+    <!-- Government-style header banner -->
+    <div class="auth-card-header">
+      <div class="gov-logo">⚡</div>
+      <div class="gov-title">
+        <div class="hi">बिहार स्टेट पॉवर होल्डिंग कं. लि.</div>
+        <div class="en">Bihar State Power Holding Company Limited</div>
       </div>
-      <div class="auth-left-content">
-        <div class="auth-badge">Consumer Complaint Portal</div>
-        <h1>Bihar State Power Holding Company Limited</h1>
-        <p>This portal enables consumers to register complaints, track complaint status, and access service-related information.</p>
-      </div>
-      <div class="auth-left-footer">
-        <div class="version-tag"></div>
+      <div style="margin-left:auto;text-align:right;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);">Consumer Services</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.8);font-weight:600;">Complaint Portal</div>
       </div>
     </div>
 
-    <!-- Right Panel -->
-    <div class="auth-right">
-      <h2>Consumer Sign In</h2>
-      <p class="auth-subtitle">Enter your registered credentials to access consumer services.</p>
+    <div class="auth-card-body">
+      <!-- Left Panel -->
+      <div class="auth-left">
+        <div class="auth-left-content">
+          <div class="auth-badge"><i class="bi bi-shield-check"></i> Official Consumer Portal</div>
+          <h1>Consumer Complaint Management System</h1>
+          <p>Register, file, and track electricity-related complaints online. Get timely resolution from BSPHCL's service teams.</p>
 
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% for category, message in messages %}
-          <div class="flash-alert flash-{{ category }}">
-            {% if category == 'success' %}{% elif category == 'danger' %}{% elif category == 'warning' %}{% else %}{% endif %}
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endwith %}
-
-      <form method="POST" action="{{ url_for('main.login') }}">
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-        <div class="form-group">
-          <label class="form-label">Email Address</label>
-          <div class="input-icon-wrap">
-            <span class="input-icon"><i class="bi bi-envelope"></i></span>
-            <input type="email" name="email" id="email" class="form-control-custom"
-                   placeholder="you@email.com" required autocomplete="email"/>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <label class="form-label mb-0">Password</label>
-            <a href="{{ url_for('main.forgot_password') }}" class="text-primary" style="font-size:12px;">Forgot Password?</a>
-          </div>
-          <div class="input-icon-wrap">
-            <span class="input-icon"><i class="bi bi-lock"></i></span>
-            <input type="password" name="password" id="password" class="form-control-custom"
-                   placeholder="••••••••" required autocomplete="current-password"/>
-            <span class="input-icon-right toggle-password" data-target="password" style="cursor:pointer;"><<i class="bi bi-eye"></i></span>
+          <div class="auth-info-list">
+            <div class="auth-info-item">
+              <i class="bi bi-check-circle-fill" style="color:#4ade80;"></i>
+              File electricity complaints online
+            </div>
+            <div class="auth-info-item">
+              <i class="bi bi-check-circle-fill" style="color:#4ade80;"></i>
+              Track complaint status in real time
+            </div>
+            <div class="auth-info-item">
+              <i class="bi bi-check-circle-fill" style="color:#4ade80;"></i>
+              Download acknowledgement receipts
+            </div>
+            <div class="auth-info-item">
+              <i class="bi bi-check-circle-fill" style="color:#4ade80;"></i>
+              Get email notifications on updates
+            </div>
           </div>
         </div>
-
-        <button type="submit" class="btn-primary-custom w-100 justify-content-center mb-3" style="padding:12px;">
-          Sign In &nbsp;<i class="bi bi-arrow-right"></i>
-        </button>
-
-        <div class="text-center" style="font-size:13px;color:var(--text-muted);">
-          New consumer?
-          <a href="{{ url_for('main.register') }}" class="text-primary fw-600">Create account</a>
+        <div class="auth-left-footer">
+          <div class="version-tag">© 2026 Bihar State Power Holding Company Limited</div>
         </div>
+      </div>
 
-        <hr style="margin:20px 0;border-color:var(--border);"/>
-        <div class="text-center">
-          <a href="{{ url_for('admin.admin_login') }}"
-             style="font-size:12.5px;background:var(--bg);border:1px solid var(--border);
-                    padding:8px 16px;border-radius:20px;color:var(--text-secondary);
-                    display:inline-flex;align-items:center;gap:6px;">
-            <i class="bi bi-shield-lock"></i> Staff Login
-          </a>
-        </div>
-      </form>
+      <!-- Right Panel -->
+      <div class="auth-right">
+        <h2>Consumer Sign In</h2>
+        <p class="auth-subtitle">Enter your registered credentials to access consumer services.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for category, message in messages %}
+            <div class="flash-alert flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('main.login') }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon"><i class="bi bi-envelope"></i></span>
+              <input type="email" name="email" class="form-control-custom"
+                     placeholder="you@email.com" required autocomplete="email"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label mb-0">Password</label>
+              <a href="{{ url_for('main.forgot_password') }}" style="font-size:12px;color:var(--navy);">Forgot Password?</a>
+            </div>
+            <div class="input-icon-wrap">
+              <span class="input-icon"><i class="bi bi-lock"></i></span>
+              <input type="password" name="password" id="password" class="form-control-custom"
+                     placeholder="••••••••" required autocomplete="current-password"/>
+              <span class="input-icon-right toggle-password" data-target="password" style="cursor:pointer;"><i class="bi bi-eye"></i></span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary-custom w-100 justify-content-center mb-3" style="padding:11px;">
+            Sign In &nbsp;<i class="bi bi-arrow-right"></i>
+          </button>
+
+          <div class="text-center" style="font-size:13px;color:var(--text-muted);">
+            New consumer? &nbsp;
+            <a href="{{ url_for('main.register') }}" style="color:var(--navy);font-weight:600;">Register Here</a>
+          </div>
+
+          <hr style="margin:18px 0;border-color:var(--border);"/>
+          <div class="text-center">
+            <a href="{{ url_for('admin.admin_login') }}"
+               style="font-size:12px;background:var(--bg);border:1px solid var(--border);
+                      padding:7px 16px;border-radius:3px;color:var(--text-secondary);
+                      display:inline-flex;align-items:center;gap:6px;">
+              <i class="bi bi-shield-lock"></i> Staff / Admin Login
+            </a>
+          </div>
+        </form>
+      </div>
     </div>
 
   </div>
 </div>
+
+<div style="text-align:center;padding:10px;font-size:11px;color:#888;">
+  For technical assistance, contact your nearest BSPHCL office &nbsp;|&nbsp; Vigilance Helpline: 0612-2505559
+</div>
+
 <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </body>
 </html>
