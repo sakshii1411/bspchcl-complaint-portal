@@ -394,15 +394,16 @@ def forgot_password():
         email = request.form.get('email', '').strip().lower()
         user = User.query.filter_by(email=email).first()
         if not user:
-            flash('No account found with that email.', 'danger')
+            flash('No account found with that email address.', 'danger')
             return render_template('forgot_password.html')
         otp_code = create_otp(email)
         sent = send_otp_email(email, otp_code, user.name)
-        if not sent:
-            flash('Unable to send OTP email at the moment. Please try again later.', 'danger')
-            return render_template('forgot_password.html')
         session['reset_email'] = email
-        flash('An OTP has been sent to your registered email address.', 'success')
+        if sent:
+            flash('An OTP has been sent to your registered email address. It is valid for 10 minutes.', 'success')
+        else:
+            # Email not configured — show OTP directly on screen (demo/dev mode)
+            flash(f'Email service unavailable. Your OTP is: {otp_code}  (valid 10 min)', 'warning')
         return redirect(url_for('main.reset_password'))
     return render_template('forgot_password.html')
 
@@ -432,7 +433,7 @@ def reset_password():
         session.pop('reset_email', None)
         flash('Password reset successful. Please sign in.', 'success')
         return redirect(url_for('main.login'))
-    return render_template('reset_password.html')
+    return render_template('reset_password.html', email=email)
 
 
 @main.route('/api/notif-count')
