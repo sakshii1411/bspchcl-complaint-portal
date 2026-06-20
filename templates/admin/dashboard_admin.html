@@ -97,13 +97,12 @@
 
 {% block scripts %}
 <script>
-const chartDefaults = {
-  color: '#444',
-  borderColor: '#D8D8D8',
-};
 Chart.defaults.color = '#777';
 Chart.defaults.borderColor = '#E8E8E8';
 Chart.defaults.font.family = "'Noto Sans', Arial, sans-serif";
+
+const NAVY = '#1A3A5C', MAROON = '#8B1A1A', GOLD = '#C8860A';
+const COLORS = [NAVY, MAROON, GOLD, '#1a6b2e', '#4a2db0', '#b56a00', '#2d6090', '#555'];
 
 new Chart(document.getElementById('trendChart'), {
   type: 'line',
@@ -112,31 +111,27 @@ new Chart(document.getElementById('trendChart'), {
     datasets: [{
       label: 'Complaints Filed',
       data: {{ trend_data|tojson }},
-      borderColor: '#1A3A5C',
-      backgroundColor: 'rgba(26,58,92,0.08)',
-      borderWidth: 2,
-      tension: 0.3,
-      fill: true,
-      pointBackgroundColor: '#1A3A5C',
+      borderColor: NAVY, backgroundColor: 'rgba(26,58,92,0.08)',
+      borderWidth: 2.5, tension: 0.4, fill: true,
+      pointBackgroundColor: NAVY, pointRadius: 4,
     }]
   },
-  options: { responsive: true, plugins: { legend: { display: false } } }
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+  }
 });
 
 new Chart(document.getElementById('catChart'), {
   type: 'doughnut',
   data: {
     labels: {{ cat_labels|tojson }},
-    datasets: [{
-      data: {{ cat_values|tojson }},
-      backgroundColor: ['#1A3A5C','#8B1A1A','#C8860A','#1a6b2e','#4a2db0','#777'],
-      borderWidth: 0,
-    }]
+    datasets: [{ data: {{ cat_values|tojson }}, backgroundColor: COLORS, borderWidth: 0 }]
   },
   options: {
-    responsive: true,
-    cutout: '60%',
-    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10, font: { size: 11 } } } }
+    responsive: true, cutout: '62%',
+    plugins: { legend: { position: 'bottom', labels: { boxWidth: 11, padding: 10, font: { size: 11 } } } }
   }
 });
 
@@ -144,16 +139,12 @@ new Chart(document.getElementById('districtChart'), {
   type: 'bar',
   data: {
     labels: {{ district_labels|tojson }},
-    datasets: [{
-      label: 'Complaints',
-      data: {{ district_values|tojson }},
-      backgroundColor: '#1A3A5C',
-    }]
+    datasets: [{ label: 'Complaints', data: {{ district_values|tojson }}, backgroundColor: NAVY, borderRadius: 3 }]
   },
   options: {
-    responsive: true,
+    responsive: true, indexAxis: 'y',
     plugins: { legend: { display: false } },
-    scales: { y: { beginAtZero: true } }
+    scales: { x: { beginAtZero: true } }
   }
 });
 </script>

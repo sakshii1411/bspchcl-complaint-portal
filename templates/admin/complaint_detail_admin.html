@@ -1,59 +1,291 @@
 {% extends "base.html" %}
-{% block title %}{{ complaint.complaint_id }} - Staff Review{% endblock %}
+{% block title %}{{ complaint.complaint_id }} – Staff Review{% endblock %}
 {% block content %}
-<div class="row g-4">
-  <div class="col-lg-8">
-    <div class="card p-4 mb-4">
-      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
-        <div>
-          <div class="complaint-id-pill mb-2">{{ complaint.complaint_id }}</div>
-          <h4 >{{ complaint.subject }}</h4>
-          <div class="d-flex gap-2 flex-wrap mt-2"><span class="badge-status badge-{{ complaint.status }}">{{ complaint.get_status_label() }}</span><span class="badge-priority {{ complaint.priority }}">{{ complaint.get_priority_label() }}</span><span class="badge-cat">{{ complaint.get_category_label() }}</span></div>
-        </div>
-        <div class="small text-muted">Consumer: {{ user.name }} | {{ user.consumer_number or complaint.consumer_number }}</div>
+
+<div class="page-header">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+      <div class="complaint-id-pill">{{ complaint.complaint_id }}</div>
+      <h4 class="mt-1">{{ complaint.subject }}</h4>
+      <div class="d-flex gap-2 flex-wrap mt-2">
+        <span class="badge-status badge-{{ complaint.status }}">{{ complaint.get_status_label() }}</span>
+        <span class="badge-priority {{ complaint.priority }}">{{ complaint.get_priority_label() }}</span>
+        <span class="badge-cat">{{ complaint.get_category_label() }}</span>
+        {% if complaint.is_overdue %}
+          <span class="badge-status badge-rejected">⚠ Overdue</span>
+        {% endif %}
       </div>
-      <p>{{ complaint.description }}</p>
     </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('main.download_receipt', complaint_id=complaint.complaint_id) }}" class="btn-ghost">
+        <i class="bi bi-download"></i> Acknowledgement
+      </a>
+      <a href="{{ url_for('main.download_resolution_report', complaint_id=complaint.complaint_id) }}" class="btn-ghost">
+        <i class="bi bi-file-earmark-text"></i> Resolution PDF
+      </a>
+      <a href="{{ url_for('admin.all_complaints') }}" class="btn-ghost">
+        <i class="bi bi-arrow-left"></i> Back
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- LEFT: description + update + timeline + replies -->
+  <div class="col-lg-8">
+
+    <!-- Consumer Info -->
     <div class="card p-4 mb-4">
-      <h6 class="fw-700 mb-3">Update Workflow</h6>
+      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">
+        <i class="bi bi-person-fill me-1"></i> Consumer Information
+      </h6>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="text-muted small mb-1">Name</div>
+          <div class="fw-700">{{ user.name }}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-muted small mb-1">Email</div>
+          <div class="fw-600" style="font-size:13px;">{{ user.email }}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-muted small mb-1">Mobile</div>
+          <div class="fw-600" style="font-size:13px;">{{ user.mobile }}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-muted small mb-1">Consumer No.</div>
+          <div class="fw-700" style="font-family:monospace;color:var(--navy);">{{ user.consumer_number or complaint.consumer_number }}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-muted small mb-1">Meter No.</div>
+          <div class="fw-600" style="font-size:13px;">{{ complaint.meter_number or 'N/A' }}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-muted small mb-1">District</div>
+          <div class="fw-600" style="font-size:13px;">{{ complaint.district or user.district or 'N/A' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Complaint Description -->
+    <div class="card p-4 mb-4">
+      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">
+        <i class="bi bi-file-text me-1"></i> Complaint Description
+      </h6>
+      <p style="font-size:14px;line-height:1.75;color:var(--text-primary);">{{ complaint.description }}</p>
+      {% if complaint.address %}
+      <div class="mt-3 p-2" style="background:var(--bg);border-radius:var(--radius-sm);font-size:13px;">
+        <i class="bi bi-geo-alt text-muted me-1"></i>
+        <strong>Location:</strong> {{ complaint.address }}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Update Workflow -->
+    <div class="card p-4 mb-4">
+      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">
+        <i class="bi bi-gear-fill me-1"></i> Update Complaint Workflow
+      </h6>
       <form method="POST">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="action" value="update_status">
         <div class="row g-3">
-          <div class="col-md-6"><label class="form-label">Status</label><select name="status" class="form-control-custom">{% for val, label in statuses %}<option value="{{ val }}" {% if complaint.status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
-          <div class="col-md-6"><label class="form-label">Priority</label><select name="priority" class="form-control-custom">{% for val, label in priorities %}<option value="{{ val }}" {% if complaint.priority == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
-          <div class="col-md-6"><label class="form-label">Department</label><input type="text" name="department" class="form-control-custom" value="{{ complaint.department or '' }}"></div>
-          <div class="col-md-6"><label class="form-label">Field Unit</label><input type="text" name="field_unit" class="form-control-custom" value="{{ complaint.field_unit or '' }}"></div>
-          <div class="col-md-6"><label class="form-label">Assign to Staff</label><select name="assigned_to" class="form-control-custom"><option value="">Select staff member</option>{% for s in staff_members %}<option value="{{ s.id }}" {% if complaint.assigned_to == s.id %}selected{% endif %}>{{ s.name }} - {{ s.display_role }}</option>{% endfor %}</select></div>
-          <div class="col-md-6"><label class="form-label">Expected Resolution Date</label><input type="date" name="expected_resolution_date" class="form-control-custom" value="{{ complaint.expected_resolution_date.strftime('%Y-%m-%d') if complaint.expected_resolution_date else '' }}"></div>
-          <div class="col-12"><label class="form-label">Resolution Summary</label><textarea name="resolution_summary" class="form-control-custom" rows="3">{{ complaint.resolution_summary or '' }}</textarea></div>
-          <div class="col-12"><label class="form-label">Consumer-visible Note</label><textarea name="admin_note" class="form-control-custom" rows="3">{{ complaint.admin_note or '' }}</textarea></div>
-          <div class="col-12"><label class="form-label">Internal Remarks</label><textarea name="internal_remarks" class="form-control-custom" rows="3">{{ complaint.internal_remarks or '' }}</textarea></div>
+          <div class="col-md-6">
+            <label class="form-label">Status *</label>
+            <select name="status" class="form-control-custom">
+              {% for val, label in statuses %}
+                <option value="{{ val }}" {% if complaint.status == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Priority *</label>
+            <select name="priority" class="form-control-custom">
+              {% for val, label in priorities %}
+                <option value="{{ val }}" {% if complaint.priority == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Assign to Staff</label>
+            <select name="assigned_to" class="form-control-custom">
+              <option value="">— Unassigned —</option>
+              {% for s in staff_members %}
+                <option value="{{ s.id }}" {% if complaint.assigned_to == s.id %}selected{% endif %}>
+                  {{ s.name }} — {{ s.display_role }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Expected Resolution Date</label>
+            <input type="date" name="expected_resolution_date" class="form-control-custom"
+                   value="{{ complaint.expected_resolution_date.strftime('%Y-%m-%d') if complaint.expected_resolution_date else '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Department</label>
+            <input type="text" name="department" class="form-control-custom"
+                   value="{{ complaint.department or '' }}" placeholder="e.g. Technical Division">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Field Unit</label>
+            <input type="text" name="field_unit" class="form-control-custom"
+                   value="{{ complaint.field_unit or '' }}" placeholder="e.g. Subdivision Patna East">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Resolution Summary <span class="text-muted small">(visible to consumer)</span></label>
+            <textarea name="resolution_summary" class="form-control-custom" rows="3"
+                      placeholder="Describe the action taken and how the issue was resolved…">{{ complaint.resolution_summary or '' }}</textarea>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Consumer-visible Note</label>
+            <textarea name="admin_note" class="form-control-custom" rows="2"
+                      placeholder="Note shown to consumer on their complaint page…">{{ complaint.admin_note or '' }}</textarea>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Internal Remarks <span class="text-muted small">(staff only)</span></label>
+            <textarea name="internal_remarks" class="form-control-custom" rows="2"
+                      placeholder="Internal notes — not visible to consumer…">{{ complaint.internal_remarks or '' }}</textarea>
+          </div>
         </div>
-        <button class="btn-primary-custom mt-3">Save Updates</button>
+        <button class="btn-primary-custom mt-3">
+          <i class="bi bi-check-circle"></i> Save Updates &amp; Notify Consumer
+        </button>
       </form>
     </div>
+
+    <!-- Timeline -->
     <div class="card p-4 mb-4">
-      <h6 class="fw-700 mb-3">Timeline Log</h6>
-      {% for item in timeline %}<div class="py-2 border-bottom"><div class="fw-600">{{ item.action.replace('_',' ').title() }}</div><div class="small {% if not item.visible_to_user %}text-danger{% else %}text-muted{% endif %}">{{ item.message }}</div><div class="small text-muted">{{ item.created_at.strftime('%d %b %Y, %I:%M %p') }}</div></div>{% else %}<div class="text-muted">No activity logged yet.</div>{% endfor %}
+      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">
+        <i class="bi bi-clock-history me-1"></i> Activity Timeline
+      </h6>
+      {% if timeline %}
+        {% for item in timeline %}
+        <div class="d-flex justify-content-between gap-3 py-2 border-bottom align-items-start">
+          <div class="d-flex gap-2">
+            <div style="width:8px;height:8px;border-radius:50%;background:{% if item.visible_to_user %}var(--navy){% else %}var(--text-muted){% endif %};
+                        margin-top:6px;flex-shrink:0;"></div>
+            <div>
+              <div class="fw-600" style="font-size:13px;">{{ item.action.replace('_',' ').title() }}</div>
+              <div class="small {% if not item.visible_to_user %}text-danger{% else %}text-muted{% endif %}">
+                {{ item.message }}
+                {% if not item.visible_to_user %}<span class="badge-status badge-rejected ms-1" style="font-size:9px;">Internal</span>{% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="small text-muted text-nowrap">{{ item.created_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="text-muted">No activity recorded yet.</div>
+      {% endif %}
     </div>
+
+    <!-- Reply thread -->
     <div class="card p-4">
-      <h6 class="fw-700 mb-3">Reply to Consumer</h6>
-      {% for r in replies %}<div class="mb-3 p-3 rounded" style="background:var(--bg2);"><div class="fw-600">{{ r.author.name if r.author else 'User' }}{% if r.is_admin_reply %} <span class="text-primary small">(Staff)</span>{% endif %}</div><div>{{ r.message }}</div><div class="small text-muted">{{ r.created_at.strftime('%d %b %Y, %I:%M %p') }}</div></div>{% endfor %}
-      <form method="POST">
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="reply"><textarea name="message" class="form-control-custom" rows="3" required placeholder="Reply to consumer"></textarea><button class="btn-primary-custom mt-3">Send Reply</button></form>
+      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">
+        <i class="bi bi-chat-text me-1"></i> Communication Thread
+      </h6>
+      {% for r in replies %}
+        <div class="reply-bubble {% if r.is_admin_reply %}admin-reply{% endif %} mb-2">
+          <div class="d-flex justify-content-between mb-1">
+            <div class="fw-600" style="font-size:13px;">
+              {{ r.author.name if r.author else 'User' }}
+              {% if r.is_admin_reply %}
+                <span class="badge-cat ms-1" style="font-size:10px;">Staff</span>
+              {% endif %}
+            </div>
+            <div class="small text-muted">{{ r.created_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+          </div>
+          <div style="font-size:13.5px;">{{ r.message }}</div>
+        </div>
+      {% else %}
+        <div class="text-muted mb-3" style="font-size:13px;">No replies yet.</div>
+      {% endfor %}
+
+      <form method="POST" class="mt-3">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="reply">
+        <label class="form-label">Send Reply to Consumer</label>
+        <textarea name="message" class="form-control-custom" rows="3" required
+                  placeholder="Type your reply to the consumer…"></textarea>
+        <button class="btn-navy mt-2">
+          <i class="bi bi-send"></i> Send Reply
+        </button>
+      </form>
     </div>
   </div>
+
+  <!-- RIGHT: summary + attachments + actions -->
   <div class="col-lg-4">
     <div class="card p-4 mb-4">
-      <h6 class="fw-700 mb-3">Quick Summary</h6>
-      <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">District</span><span>{{ complaint.district or 'Not specified' }}</span></div>
-      <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Expected Date</span><span>{{ complaint.expected_resolution_date.strftime('%d %b %Y') if complaint.expected_resolution_date else 'Not set' }}</span></div>
-      <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Assigned</span><span>{{ complaint.assignee.name if complaint.assignee else 'Pending' }}</span></div>
-      <div class="d-flex justify-content-between py-2"><span class="text-muted">Reopened</span><span>{{ complaint.reopen_count }}</span></div>
+      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">
+        Complaint Summary
+      </h6>
+      <div class="d-flex justify-content-between py-2 border-bottom">
+        <span class="text-muted small">Filed On</span>
+        <span class="fw-600" style="font-size:13px;">{{ complaint.created_at.strftime('%d %b %Y') }}</span>
+      </div>
+      <div class="d-flex justify-content-between py-2 border-bottom">
+        <span class="text-muted small">Last Updated</span>
+        <span class="fw-600" style="font-size:13px;">{{ complaint.updated_at.strftime('%d %b %Y') if complaint.updated_at else '—' }}</span>
+      </div>
+      <div class="d-flex justify-content-between py-2 border-bottom">
+        <span class="text-muted small">Assigned To</span>
+        <span class="fw-600" style="font-size:13px;">{{ complaint.assignee.name if complaint.assignee else 'Unassigned' }}</span>
+      </div>
+      <div class="d-flex justify-content-between py-2 border-bottom">
+        <span class="text-muted small">Expected Date</span>
+        <span class="fw-600" style="font-size:13px;{% if complaint.is_overdue %}color:var(--primary);{% endif %}">
+          {{ complaint.expected_resolution_date.strftime('%d %b %Y') if complaint.expected_resolution_date else 'Not set' }}
+        </span>
+      </div>
+      <div class="d-flex justify-content-between py-2 border-bottom">
+        <span class="text-muted small">Reopen Count</span>
+        <span class="fw-600" style="font-size:13px;">{{ complaint.reopen_count }}</span>
+      </div>
+      {% if complaint.rating %}
+      <div class="d-flex justify-content-between py-2">
+        <span class="text-muted small">Consumer Rating</span>
+        <span class="fw-700" style="color:var(--accent-gold);">
+          {{ '★' * complaint.rating.rating }}{{ '☆' * (5 - complaint.rating.rating) }}
+        </span>
+      </div>
+      {% endif %}
     </div>
-    {% if attachments %}<div class="card p-4 mb-4"><h6 class="fw-700 mb-3">Attachments</h6>{% for file in attachments %}<div class="py-2 border-bottom"><a href="{{ url_for('static', filename='uploads/' + file.file_path) }}" target="_blank">{{ file.original_name or file.file_path }}</a></div>{% endfor %}</div>{% endif %}
-    <div class="card p-4"><a href="{{ url_for('main.download_receipt', complaint_id=complaint.complaint_id) }}" class="btn-ghost w-100 mb-2">Acknowledgement PDF</a><a href="{{ url_for('main.download_resolution_report', complaint_id=complaint.complaint_id) }}" class="btn-ghost w-100">Resolution Report</a></div>
+
+    {% if attachments %}
+    <div class="card p-4 mb-4">
+      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">
+        <i class="bi bi-paperclip me-1"></i> Attachments
+      </h6>
+      {% for file in attachments %}
+      <div class="py-2 border-bottom">
+        <a href="{{ url_for('static', filename='uploads/' + file.file_path) }}"
+           target="_blank" style="font-size:13px;color:var(--navy);">
+          <i class="bi bi-file-earmark me-1"></i>
+          {{ file.original_name or file.file_path }}
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Consumer profile quick link -->
+    <div class="card p-4">
+      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">
+        Quick Actions
+      </h6>
+      <a href="{{ url_for('admin.user_details', user_id=user.id) }}" class="btn-ghost w-100 mb-2 justify-content-center">
+        <i class="bi bi-person"></i> View Consumer Profile
+      </a>
+      <a href="{{ url_for('main.download_receipt', complaint_id=complaint.complaint_id) }}" class="btn-ghost w-100 mb-2 justify-content-center">
+        <i class="bi bi-file-pdf"></i> Acknowledgement PDF
+      </a>
+      <a href="{{ url_for('main.download_resolution_report', complaint_id=complaint.complaint_id) }}" class="btn-ghost w-100 justify-content-center">
+        <i class="bi bi-file-earmark-check"></i> Resolution Report PDF
+      </a>
+    </div>
   </div>
 </div>
 {% endblock %}

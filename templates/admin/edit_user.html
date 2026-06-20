@@ -1,21 +1,40 @@
 {% extends "base.html" %}
-{% block title %}Edit User – BSPHCL Admin{% endblock %}
+{% block title %}Edit {{ user.name }} – BSPHCL Admin{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center gap-3 mb-4">
-  <a href="{{ url_for('admin.user_details', user_id=user.id) }}" class="btn-ghost" style="padding:7px 14px;">← Back</a>
-  <h4 class="fw-800 mb-0">Edit User</h4>
+<div class="page-header">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+      <h4>Edit Consumer Account</h4>
+      <p class="text-muted">Modify account details for {{ user.name }}.</p>
+    </div>
+    <a href="{{ url_for('admin.user_details', user_id=user.id) }}" class="btn-ghost">
+      <i class="bi bi-arrow-left"></i> Back to Profile
+    </a>
+  </div>
 </div>
 
 <div class="row justify-content-center">
-  <div class="col-lg-7">
-    <div class="card p-4 fade-in-up">
-      <!-- User header -->
-      <div class="d-flex align-items-center gap-3 mb-4 pb-3" style="border-bottom:1px solid var(--border);">
-        <div class="profile-avatar-placeholder" style="width:52px;height:52px;font-size:20px;">{{ user.name[0].upper() }}</div>
+  <div class="col-lg-8">
+    <div class="card p-4">
+      <!-- User header strip -->
+      <div class="d-flex align-items-center gap-3 mb-4 pb-3" style="border-bottom:2px solid var(--border);">
+        <div style="width:50px;height:50px;border-radius:50%;background:var(--navy);
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:20px;font-weight:800;color:#fff;flex-shrink:0;">
+          {{ user.name[0].upper() }}
+        </div>
         <div>
-          <div class="fw-700">{{ user.name }}</div>
-          <div style="font-size:12px;color:var(--text-muted);">{{ user.email }} · Consumer ID {{ user.id }}</div>
+          <div class="fw-700" style="font-size:15px;">{{ user.name }}</div>
+          <div style="font-size:12px;color:var(--text-muted);">
+            {{ user.email }} &nbsp;·&nbsp; Consumer ID #{{ user.id }}
+            &nbsp;·&nbsp;
+            {% if user.is_active %}
+              <span style="color:var(--success);font-weight:600;">● Active</span>
+            {% else %}
+              <span style="color:var(--primary);font-weight:600;">● Inactive</span>
+            {% endif %}
+          </div>
         </div>
       </div>
 
@@ -23,50 +42,53 @@
         <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <div class="row g-3">
           <div class="col-md-6">
-            <div class="form-group">
-              <label class="form-label">Full Name *</label>
-              <div class="input-icon-wrap">
-                <span class="input-icon"><i class="bi bi-person"></i></span>
-                <input type="text" name="name" class="form-control-custom"
-                       value="{{ user.name }}" required/>
-              </div>
+            <label class="form-label">Full Name *</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon"><i class="bi bi-person"></i></span>
+              <input type="text" name="name" class="form-control-custom"
+                     value="{{ user.name }}" required>
             </div>
           </div>
           <div class="col-md-6">
-            <div class="form-group">
-              <label class="form-label">Email (Read-only)</label>
-              <input type="email" class="form-control-custom" value="{{ user.email }}" disabled
-                     style="opacity:0.6;cursor:not-allowed;"/>
+            <label class="form-label">Email Address</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon"><i class="bi bi-envelope"></i></span>
+              <input type="email" class="form-control-custom" value="{{ user.email }}"
+                     disabled style="opacity:0.6;cursor:not-allowed;">
+            </div>
+            <div class="small text-muted mt-1">Email cannot be changed once registered.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Mobile Number *</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon"><i class="bi bi-phone"></i></span>
+              <input type="tel" name="mobile" class="form-control-custom"
+                     value="{{ user.mobile }}" required pattern="[6-9][0-9]{9}" maxlength="10">
             </div>
           </div>
           <div class="col-md-6">
-            <div class="form-group">
-              <label class="form-label">Mobile Number *</label>
-              <div class="input-icon-wrap">
-                <span class="input-icon"><i class="bi bi-phone"></i></span>
-                <input type="tel" name="mobile" class="form-control-custom"
-                       value="{{ user.mobile }}" required pattern="[6-9][0-9]{9}"/>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-group">
-              <label class="form-label">District</label>
+            <label class="form-label">District</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon"><i class="bi bi-geo-alt"></i></span>
               <input type="text" name="district" class="form-control-custom"
-                     value="{{ user.district or '' }}" placeholder="e.g. Patna"/>
+                     value="{{ user.district.title() if user.district else '' }}"
+                     placeholder="e.g. Patna">
             </div>
           </div>
           <div class="col-12">
-            <div class="form-group">
-              <label class="form-label">Address</label>
-              <textarea name="address" class="form-control-custom" rows="2">{{ user.address or '' }}</textarea>
-            </div>
+            <label class="form-label">Full Address</label>
+            <textarea name="address" class="form-control-custom" rows="2"
+                      placeholder="House No., Street, Colony, City">{{ user.address or '' }}</textarea>
           </div>
         </div>
 
-        <div class="d-flex gap-3 mt-3">
-          <button type="submit" class="btn-primary-custom" style="padding:11px 28px;">💾 Save Changes</button>
-          <a href="{{ url_for('admin.user_details', user_id=user.id) }}" class="btn-ghost" style="padding:11px 20px;">Cancel</a>
+        <div class="d-flex gap-2 flex-wrap mt-4 pt-3" style="border-top:1px solid var(--border);">
+          <button type="submit" class="btn-primary-custom">
+            <i class="bi bi-check-circle"></i> Save Changes
+          </button>
+          <a href="{{ url_for('admin.user_details', user_id=user.id) }}" class="btn-ghost">
+            Cancel
+          </a>
         </div>
       </form>
     </div>

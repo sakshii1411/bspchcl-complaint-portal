@@ -441,3 +441,29 @@ def reset_password():
 def notif_count():
     count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
     return jsonify({'count': count})
+
+
+@main.route('/complaints/export/csv')
+@login_required
+def export_complaints_csv():
+    import csv, io
+    complaints = Complaint.query.filter_by(user_id=current_user.id).order_by(Complaint.created_at.desc()).all()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Complaint ID','Subject','Category','Priority','Status','District','Consumer No','Filed On','Expected Resolution','Resolved On'])
+    for c in complaints:
+        writer.writerow([
+            c.complaint_id, c.subject, c.get_category_label(),
+            c.get_priority_label(), c.get_status_label(),
+            c.district or '', c.consumer_number or '',
+            c.created_at.strftime('%d %b %Y'),
+            c.expected_resolution_date.strftime('%d %b %Y') if c.expected_resolution_date else '',
+            c.resolved_at.strftime('%d %b %Y') if c.resolved_at else '',
+        ])
+    output.seek(0)
+    return send_file(
+        io.BytesIO(output.getvalue().encode()),
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name=f'BSPHCL_Complaints_{current_user.consumer_number}.csv'
+    )

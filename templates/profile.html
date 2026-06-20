@@ -7,30 +7,89 @@
   <p class="text-muted">Manage your personal information and account settings.</p>
 </div>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="flash-alert flash-{{ category }}">{{ message }}</div>
+  {% endfor %}
+{% endwith %}
+
 <div class="row g-4">
+  <!-- Left: avatar + stats -->
   <div class="col-lg-4">
     <div class="card p-4 text-center mb-4">
-      {% if current_user.profile_pic %}
-        <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}"
-             alt="Profile" class="profile-avatar-img mx-auto d-block">
-      {% else %}
-        <div class="profile-avatar-placeholder mx-auto">{{ current_user.name[0].upper() }}</div>
-      {% endif %}
-      <h5 class="fw-800 mt-3 mb-1">{{ current_user.name }}</h5>
-      <div class="text-muted small">{{ current_user.email }}</div>
-      <div class="mt-3">
-        <div class="small text-muted mb-1">Profile Completion</div>
-        <div class="progress">
-          <div class="progress-bar" role="progressbar" style="width:{{ profile_completion }}%;">{{ profile_completion }}%</div>
+      <div class="position-relative d-inline-block mx-auto mb-3">
+        {% if current_user.profile_pic %}
+          <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}"
+               alt="Profile Photo"
+               style="width:90px;height:90px;border-radius:50%;object-fit:cover;
+                      border:3px solid var(--navy-soft);">
+        {% else %}
+          <div style="width:90px;height:90px;border-radius:50%;background:var(--navy);
+                      display:flex;align-items:center;justify-content:center;
+                      font-size:34px;font-weight:800;color:#fff;margin:0 auto;">
+            {{ current_user.name[0].upper() }}
+          </div>
+        {% endif %}
+        <!-- Camera icon overlay -->
+        <label for="quick-photo-input"
+               style="position:absolute;bottom:0;right:0;width:28px;height:28px;
+                      background:var(--primary);border-radius:50%;cursor:pointer;
+                      display:flex;align-items:center;justify-content:center;
+                      border:2px solid #fff;" title="Change photo">
+          <i class="bi bi-camera-fill" style="color:#fff;font-size:12px;"></i>
+        </label>
+      </div>
+
+      <!-- Quick photo update mini-form -->
+      <form id="quick-photo-form" method="POST" enctype="multipart/form-data" style="display:none;">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="update_profile">
+        <input type="hidden" name="name" value="{{ current_user.name }}">
+        <input type="hidden" name="mobile" value="{{ current_user.mobile }}">
+        <input type="file" id="quick-photo-input" name="profile_pic"
+               accept="image/*" style="display:none;">
+      </form>
+
+      <h5 class="fw-800 mb-1">{{ current_user.name }}</h5>
+      <div class="text-muted small mb-1">{{ current_user.email }}</div>
+      <div class="mb-3">
+        <span class="badge-cat">{{ current_user.district or 'Bihar' }}</span>
+      </div>
+
+      <!-- Profile completion bar -->
+      <div class="mb-2" style="text-align:left;">
+        <div class="d-flex justify-content-between mb-1">
+          <span style="font-size:12px;font-weight:600;color:var(--text-secondary);">Profile Completion</span>
+          <span style="font-size:12px;font-weight:700;color:var(--navy);">{{ profile_completion }}%</span>
         </div>
+        <div class="progress">
+          <div class="progress-bar" role="progressbar"
+               style="width:{{ profile_completion }}%;"
+               aria-valuenow="{{ profile_completion }}" aria-valuemin="0" aria-valuemax="100">
+          </div>
+        </div>
+        {% if profile_completion < 100 %}
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+            Complete your profile for better service
+          </div>
+        {% endif %}
       </div>
     </div>
 
-    <div class="card p-4">
-      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">Account Information</h6>
+    <!-- Account info card -->
+    <div class="card p-4 mb-4">
+      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">
+        Account Information
+      </h6>
       <div class="d-flex justify-content-between py-2 border-bottom">
         <span class="text-muted small">Consumer No.</span>
-        <span class="fw-600" style="font-size:13px;">{{ current_user.consumer_number or 'N/A' }}</span>
+        <span class="fw-700" style="font-size:13px;font-family:monospace;color:var(--navy);">
+          {{ current_user.consumer_number or 'N/A' }}
+        </span>
+      </div>
+      <div class="d-flex justify-content-between py-2 border-bottom">
+        <span class="text-muted small">Mobile</span>
+        <span class="fw-600" style="font-size:13px;">{{ current_user.mobile }}</span>
       </div>
       <div class="d-flex justify-content-between py-2 border-bottom">
         <span class="text-muted small">District</span>
@@ -38,79 +97,175 @@
       </div>
       <div class="d-flex justify-content-between py-2 border-bottom">
         <span class="text-muted small">Registered On</span>
-        <span class="fw-600" style="font-size:13px;">{{ current_user.created_at.strftime('%b %Y') }}</span>
+        <span class="fw-600" style="font-size:13px;">{{ current_user.created_at.strftime('%d %b %Y') }}</span>
       </div>
       <div class="d-flex justify-content-between py-2">
         <span class="text-muted small">Last Login</span>
-        <span class="fw-600" style="font-size:13px;">{{ current_user.last_login.strftime('%d %b %Y') if current_user.last_login else 'N/A' }}</span>
+        <span class="fw-600" style="font-size:13px;">
+          {{ current_user.last_login.strftime('%d %b %Y') if current_user.last_login else 'N/A' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Complaint stats -->
+    <div class="card p-4">
+      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">
+        My Complaint Summary
+      </h6>
+      <div class="d-flex justify-content-between py-2 border-bottom">
+        <span class="text-muted small">Total Filed</span>
+        <span class="fw-700">{{ total_complaints }}</span>
+      </div>
+      <div class="d-flex justify-content-between py-2 border-bottom">
+        <span class="text-muted small">Resolved</span>
+        <span class="fw-700" style="color:var(--success);">{{ resolved }}</span>
+      </div>
+      <div class="d-flex justify-content-between py-2">
+        <span class="text-muted small">Pending</span>
+        <span class="fw-700" style="color:var(--warning);">{{ total_complaints - resolved }}</span>
       </div>
     </div>
   </div>
 
+  <!-- Right: edit forms -->
   <div class="col-lg-8">
+    <!-- Update profile -->
     <div class="card p-4 mb-4">
-      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">Update Profile</h6>
+      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">
+        <i class="bi bi-person-gear me-1"></i> Update Profile Information
+      </h6>
       <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="action" value="update_profile">
         <div class="row g-3">
           <div class="col-md-6">
-            <label class="form-label">Full Name</label>
-            <input type="text" name="name" class="form-control-custom" value="{{ current_user.name }}">
+            <label class="form-label">Full Name *</label>
+            <input type="text" name="name" class="form-control-custom"
+                   value="{{ current_user.name }}" required>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Mobile Number</label>
-            <input type="text" name="mobile" class="form-control-custom" value="{{ current_user.mobile }}">
+            <label class="form-label">Mobile Number *</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon"><i class="bi bi-phone"></i></span>
+              <input type="tel" name="mobile" class="form-control-custom"
+                     value="{{ current_user.mobile }}" required
+                     pattern="[6-9][0-9]{9}" maxlength="10">
+            </div>
           </div>
           <div class="col-md-6">
             <label class="form-label">District</label>
             <input type="text" name="district" class="form-control-custom"
-                   value="{{ current_user.district.title() if current_user.district else '' }}">
+                   value="{{ current_user.district.title() if current_user.district else '' }}"
+                   placeholder="e.g. Patna">
           </div>
           <div class="col-md-6">
             <label class="form-label">Profile Photo</label>
-            <input type="file" name="profile_pic" class="form-control-custom" accept="image/*">
-            <div class="small text-muted mt-1">Formats: JPG, PNG. Use a recent photo.</div>
+            <input type="file" name="profile_pic" class="form-control-custom"
+                   accept="image/png,image/jpeg,image/jpg">
+            <div class="small text-muted mt-1">JPG or PNG, max 2 MB. Current photo kept if left blank.</div>
           </div>
           <div class="col-12">
-            <label class="form-label">Address</label>
-            <textarea name="address" class="form-control-custom" rows="3">{{ current_user.address or '' }}</textarea>
+            <label class="form-label">Full Address</label>
+            <textarea name="address" class="form-control-custom" rows="2"
+                      placeholder="House No., Street, Colony, City">{{ current_user.address or '' }}</textarea>
           </div>
         </div>
         <button class="btn-primary-custom mt-3">
-          <i class="bi bi-check-circle"></i> Update Profile
+          <i class="bi bi-check-circle"></i> Save Changes
         </button>
       </form>
     </div>
 
+    <!-- Change password -->
     <div class="card p-4">
-      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">Change Password</h6>
+      <h6 class="fw-700 mb-3" style="color:var(--navy-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">
+        <i class="bi bi-lock-fill me-1"></i> Change Password
+      </h6>
       <form method="POST">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="action" value="change_password">
         <div class="row g-3">
           <div class="col-12">
             <label class="form-label">Current Password</label>
-            <input type="password" name="current_password" class="form-control-custom"
-                   placeholder="Enter current password">
+            <div class="input-icon-wrap">
+              <span class="input-icon"><i class="bi bi-lock"></i></span>
+              <input type="password" name="current_password" id="cur-pw" class="form-control-custom"
+                     placeholder="Enter your current password">
+              <span class="input-icon-right toggle-password" data-target="cur-pw" style="cursor:pointer;">
+                <i class="bi bi-eye"></i>
+              </span>
+            </div>
           </div>
           <div class="col-md-6">
             <label class="form-label">New Password</label>
-            <input type="password" name="new_password" class="form-control-custom"
-                   placeholder="Minimum 8 characters">
+            <div class="input-icon-wrap">
+              <span class="input-icon"><i class="bi bi-lock-fill"></i></span>
+              <input type="password" name="new_password" id="new-pw" class="form-control-custom"
+                     placeholder="Minimum 8 characters" minlength="8">
+              <span class="input-icon-right toggle-password" data-target="new-pw" style="cursor:pointer;">
+                <i class="bi bi-eye"></i>
+              </span>
+            </div>
+            <!-- Password strength -->
+            <div id="pw-strength-bar" style="display:none;margin-top:6px;">
+              <div style="height:4px;border-radius:2px;background:var(--bg2);overflow:hidden;">
+                <div id="pw-strength-fill" style="height:100%;border-radius:2px;width:0;transition:width 0.3s,background 0.3s;"></div>
+              </div>
+              <div id="pw-strength-label" style="font-size:11px;margin-top:3px;"></div>
+            </div>
           </div>
           <div class="col-md-6">
             <label class="form-label">Confirm New Password</label>
-            <input type="password" name="confirm_password" class="form-control-custom"
-                   placeholder="Repeat new password">
+            <div class="input-icon-wrap">
+              <span class="input-icon"><i class="bi bi-lock-fill"></i></span>
+              <input type="password" name="confirm_password" id="conf-pw" class="form-control-custom"
+                     placeholder="Repeat new password" minlength="8">
+              <span class="input-icon-right toggle-password" data-target="conf-pw" style="cursor:pointer;">
+                <i class="bi bi-eye"></i>
+              </span>
+            </div>
           </div>
         </div>
-        <div class="small text-muted mt-2">Password must be at least 8 characters long.</div>
         <button class="btn-ghost mt-3">
-          <i class="bi bi-lock"></i> Change Password
+          <i class="bi bi-shield-lock"></i> Update Password
         </button>
       </form>
     </div>
   </div>
 </div>
+
+<script>
+// Quick photo upload — submit form as soon as file is chosen
+document.getElementById('quick-photo-input')?.addEventListener('change', function() {
+  if (this.files.length > 0) {
+    document.getElementById('quick-photo-form').submit();
+  }
+});
+
+// Password strength meter
+const pwInput = document.getElementById('new-pw');
+if (pwInput) {
+  pwInput.addEventListener('input', function() {
+    const bar = document.getElementById('pw-strength-bar');
+    const fill = document.getElementById('pw-strength-fill');
+    const lbl = document.getElementById('pw-strength-label');
+    if (!this.value) { bar.style.display='none'; return; }
+    bar.style.display='block';
+    let s = 0;
+    if (this.value.length >= 8) s++;
+    if (/[A-Z]/.test(this.value)) s++;
+    if (/[0-9]/.test(this.value)) s++;
+    if (/[^A-Za-z0-9]/.test(this.value)) s++;
+    const levels = [
+      {w:'25%',bg:'#e53e3e',t:'Weak'},
+      {w:'50%',bg:'#dd6b20',t:'Fair'},
+      {w:'75%',bg:'#d69e2e',t:'Good'},
+      {w:'100%',bg:'#38a169',t:'Strong'},
+    ];
+    const l = levels[Math.max(s-1,0)];
+    fill.style.width=l.w; fill.style.background=l.bg;
+    lbl.textContent=l.t; lbl.style.color=l.bg;
+  });
+}
+</script>
 {% endblock %}

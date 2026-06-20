@@ -44,6 +44,9 @@
           <span class="nav-icon"><i class="bi bi-bell-fill"></i></span> Notifications
           <span class="nav-badge" id="notif-badge" style="display:none;"></span>
         </a>
+        <a href="{{ url_for('main.help_desk') }}" class="nav-item {% if request.endpoint == 'main.help_desk' %}active{% endif %}">
+          <span class="nav-icon"><i class="bi bi-question-circle-fill"></i></span> Help Desk
+        </a>
         <div class="nav-section-label" style="margin-top:8px;">Account</div>
         <a href="{{ url_for('main.profile') }}" class="nav-item {% if request.endpoint == 'main.profile' %}active{% endif %}">
           <span class="nav-icon"><i class="bi bi-person-fill"></i></span> My Profile
@@ -98,11 +101,20 @@
             </a>
           {% endif %}
           <div class="topbar-user">
-            <div class="topbar-avatar">{{ current_user.name[0].upper() }}</div>
-            <div class="topbar-user-info">
-              <div class="username">{{ current_user.name.split()[0] }}</div>
-              <div class="user-role">{{ current_user.display_role if current_user.is_authenticated else '' }}</div>
-            </div>
+            <a href="{{ url_for('main.profile') if not current_user.is_staff else '#' }}"
+               style="display:flex;align-items:center;gap:8px;text-decoration:none;">
+              {% if current_user.profile_pic %}
+                <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}"
+                     style="width:32px;height:32px;border-radius:50%;object-fit:cover;
+                            border:2px solid rgba(255,255,255,0.2);" alt="">
+              {% else %}
+                <div class="topbar-avatar">{{ current_user.name[0].upper() }}</div>
+              {% endif %}
+              <div class="topbar-user-info">
+                <div class="username">{{ current_user.name.split()[0] }}</div>
+                <div class="user-role">{{ current_user.display_role if current_user.is_authenticated else '' }}</div>
+              </div>
+            </a>
           </div>
         {% endif %}
       </div>
