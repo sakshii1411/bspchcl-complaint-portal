@@ -71,7 +71,7 @@
           {% endfor %}
         {% endwith %}
 
-        <form method="POST" action="{{ url_for('main.register') }}" class="show-loading">
+        <form method="POST" action="{{ url_for('main.register') }}" id="reg-form">
           <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
           <div class="row g-3">
             <div class="col-md-6">
@@ -151,7 +151,7 @@
           </div>
 
           <div class="d-flex align-items-start gap-2 my-3">
-            <input type="checkbox" name="terms" id="terms" required style="margin-top:3px;accent-color:var(--navy);"/>
+            <input type="checkbox" name="terms" id="terms" style="margin-top:3px;accent-color:var(--navy);"/>
             <label for="terms" style="font-size:12.5px;color:var(--text-secondary);">
               I hereby declare that the information provided is true and correct, and I agree to the
               <a href="#" style="color:var(--navy);">Terms of Service</a> and
@@ -159,9 +159,31 @@
             </label>
           </div>
 
-          <button type="submit" class="btn-primary-custom w-100 justify-content-center" style="padding:11px;">
+          <button type="submit" class="btn-primary-custom w-100 justify-content-center" style="padding:11px;" id="reg-submit">
             Submit Registration &nbsp;<i class="bi bi-arrow-right"></i>
           </button>
+
+          <script>
+          document.getElementById('reg-form').addEventListener('submit', function(e) {
+            var terms = document.getElementById('terms');
+            if (terms && !terms.checked) {
+              e.preventDefault();
+              alert('Please accept the Terms of Service to continue.');
+              terms.focus();
+              return false;
+            }
+            var pw = document.getElementById('reg-password').value;
+            var cpw = document.getElementById('confirm-pw').value;
+            if (pw !== cpw) {
+              e.preventDefault();
+              alert('Passwords do not match. Please re-enter.');
+              document.getElementById('confirm-pw').focus();
+              return false;
+            }
+            document.getElementById('reg-submit').disabled = true;
+            document.getElementById('reg-submit').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+          });
+          </script>
 
           <div class="text-center mt-3" style="font-size:13px;color:var(--text-muted);">
             Already registered?

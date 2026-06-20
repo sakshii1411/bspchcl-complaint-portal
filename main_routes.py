@@ -44,6 +44,7 @@ def register():
         district = request.form.get('district', '').strip()
         address = request.form.get('address', '').strip()
 
+        terms = request.form.get('terms')
         errors = []
         if not all([name, email, mobile, password, confirm]):
             errors.append('All required fields must be filled.')
@@ -53,10 +54,14 @@ def register():
             errors.append('Password must be at least 8 characters.')
         if not mobile.isdigit() or len(mobile) != 10:
             errors.append('Enter a valid 10-digit mobile number.')
+        if not mobile[0] in '6789':
+            errors.append('Enter a valid Indian mobile number starting with 6, 7, 8 or 9.')
         if User.query.filter_by(email=email).first():
-            errors.append('Email already registered.')
+            errors.append('This email address is already registered. Please login instead.')
         if User.query.filter_by(mobile=mobile).first():
-            errors.append('Mobile number already registered.')
+            errors.append('This mobile number is already registered.')
+        if not terms:
+            errors.append('You must accept the Terms of Service to register.')
 
         if errors:
             for e in errors:
