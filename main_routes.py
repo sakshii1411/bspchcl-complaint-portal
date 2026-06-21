@@ -390,7 +390,7 @@ def toggle_notification(notif_id):
 
 @main.route('/help')
 def help_desk():
-    return render_template('help_desk.html', tracked_complaint=None)
+    return render_template('help_desk.html', tracked_complaint=None, not_found=False)
 
 
 @main.route('/forgot-password', methods=['GET', 'POST'])
