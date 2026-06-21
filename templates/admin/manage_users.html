@@ -82,14 +82,16 @@
         <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn-ghost" style="padding:5px 10px;font-size:12px;
                   color:{{ '#b02a37' if user.is_active else 'var(--success)' }};"
-                  onclick="return confirm('Are you sure you want to change user status?');">
+                  data-confirm="Change status for {{ user.name }}?">
                   {{ 'Deactivate' if user.is_active else 'Activate' }}
                 </button>
               </form>
               <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" style="display:inline;">
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn-ghost" style="padding:5px 10px;font-size:12px;color:var(--danger);"
-                        data-confirm="Delete user {{ user.name }}? This also deletes all their complaints.">🗑</button>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-ghost" style="padding:5px 10px;font-size:12px;color:var(--primary);"
+                        data-confirm="Permanently delete {{ user.name }} and all their complaints? This cannot be undone.">
+                  <i class="bi bi-trash3"></i>
+                </button>
               </form>
             </div>
           </td>
@@ -122,7 +124,7 @@
 
   {% else %}
   <div class="text-center p-5 text-muted">
-    <div style="font-size:40px;margin-bottom:12px;">👥</div>
+    <i class="bi bi-people" style="font-size:40px;display:block;margin-bottom:12px;opacity:0.3;"></i>
     <h6>No users found</h6>
     <p style="font-size:13px;">Try adjusting your search filters.</p>
   </div>

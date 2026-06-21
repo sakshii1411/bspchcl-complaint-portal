@@ -96,7 +96,7 @@
               <form method="POST" action="{{ url_for('admin.toggle_staff', user_id=user.id) }}" style="display:inline;">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn-ghost" style="padding:5px 10px;font-size:12px;color:{{ '#b02a37' if user.is_active else 'var(--success)' }};"
-                        onclick="return confirm('Change staff account status?');">
+                        data-confirm="Change status for this staff account?">
                   {{ 'Deactivate' if user.is_active else 'Activate' }}
                 </button>
               </form>
@@ -105,7 +105,7 @@
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                 <input type="password" name="new_password" class="form-control-custom" placeholder="New Password" minlength="8" required style="width:140px;padding:6px 10px;font-size:12px;">
                 <button type="submit" class="btn-ghost" style="padding:5px 10px;font-size:12px;"
-                        onclick="return confirm('Reset password for this staff account?');">
+                        data-confirm="Reset password for this staff account?">
                   Reset Password
                 </button>
               </form>
