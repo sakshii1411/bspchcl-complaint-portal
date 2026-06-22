@@ -74,6 +74,36 @@
           {% endfor %}
         {% endwith %}
 
+        <!-- Demo credentials banner -->
+        <div style="background:var(--navy-soft);border:1px solid #b8ccdf;border-radius:var(--radius-sm);
+                    padding:10px 12px;margin-bottom:16px;font-size:12px;">
+          <div style="font-weight:700;color:var(--navy);margin-bottom:6px;">
+            <i class="bi bi-info-circle-fill me-1"></i> Demo Credentials
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="color:var(--text-secondary);">Consumer</span>
+              <div style="display:flex;gap:6px;">
+                <button type="button" class="demo-fill-btn"
+                        data-email="priya.singh1@gmail.com" data-pw="Consumer@2024"
+                        style="background:var(--navy);color:#fff;border:none;border-radius:3px;
+                               padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;">
+                  Fill Credentials
+                </button>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="color:var(--text-secondary);">Admin</span>
+              <button type="button" class="demo-fill-btn"
+                      data-email="admin@bsphcl.gov.in" data-pw="Admin@2024"
+                      style="background:var(--primary);color:#fff;border:none;border-radius:3px;
+                             padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;">
+                Fill Credentials
+              </button>
+            </div>
+          </div>
+        </div>
+
         <form method="POST" action="{{ url_for('main.login') }}">
           <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
           <div class="form-group">
@@ -128,5 +158,16 @@
 </div>
 
 <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+<script>
+document.querySelectorAll('.demo-fill-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelector('input[name="email"]').value = this.dataset.email;
+    document.querySelector('input[name="password"]').value = this.dataset.pw;
+    // Briefly highlight
+    document.querySelector('input[name="email"]').style.borderColor = 'var(--navy)';
+    setTimeout(() => document.querySelector('input[name="email"]').style.borderColor = '', 1500);
+  });
+});
+</script>
 </body>
 </html>

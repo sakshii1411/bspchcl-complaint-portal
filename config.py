@@ -35,3 +35,13 @@ class Config:
     ADMIN_SECRET_CODE = os.environ.get('ADMIN_SECRET_CODE', 'change-admin-secret')
     OTP_EXPIRY_MINUTES = int(os.environ.get('OTP_EXPIRY_MINUTES', 10))
     APP_NAME = 'BSPHCL Consumer Complaint Portal'
+
+    # ── Cloudinary (file uploads — persistent across deploys) ─────────────────
+    CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME', '')
+    CLOUDINARY_API_KEY    = os.environ.get('CLOUDINARY_API_KEY', '')
+    CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET', '')
+    USE_CLOUDINARY = bool(
+        os.environ.get('CLOUDINARY_CLOUD_NAME') and
+        os.environ.get('CLOUDINARY_API_KEY') and
+        os.environ.get('CLOUDINARY_API_SECRET')
+    )

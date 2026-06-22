@@ -43,6 +43,10 @@ def create_app(config_class=Config):
     def inject_globals():
         return {'current_year': datetime.utcnow().year, 'csrf_token': get_csrf_token}
 
+    # ── Jinja2 globals ────────────────────────────────────────────────────────
+    from utils import get_file_url
+    app.jinja_env.globals['get_file_url'] = get_file_url
+
     @app.errorhandler(400)
     def bad_request(e):
         desc = getattr(e, 'description', None) or 'The request could not be understood by the server.'

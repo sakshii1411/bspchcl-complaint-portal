@@ -19,7 +19,7 @@
     <div class="card p-4 text-center mb-4">
       <div class="position-relative d-inline-block mx-auto mb-3">
         {% if current_user.profile_pic %}
-          <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}"
+          <img src="{{ get_file_url(current_user.profile_pic) }}"
                alt="Profile Photo"
                style="width:90px;height:90px;border-radius:50%;object-fit:cover;
                       border:3px solid var(--navy-soft);">

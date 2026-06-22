@@ -93,7 +93,7 @@
       </h6>
       {% for file in attachments %}
       <div class="py-2 border-bottom">
-        <a href="{{ url_for('static', filename='uploads/' + file.file_path) }}" target="_blank" style="color:var(--navy);">
+        <a href="{{ get_file_url(file.file_path) }}" target="_blank" style="color:var(--navy);">
           <i class="bi bi-file-earmark"></i> {{ file.original_name or file.file_path }}
         </a>
       </div>

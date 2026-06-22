@@ -1,149 +1,183 @@
-<div align="center">
+# BSPHCL Consumer Complaint Portal
 
-<h1>⚡ BSPHCL Consumer Complaint Portal</h1>
+A full-stack complaint management system built during an internship at **Bihar State Power Holding Company Limited (BSPHCL)**. The portal handles the complete complaint lifecycle — from submission by consumers to resolution by staff — with role-based access, real-time tracking, analytics, and PDF exports.
 
-<p>A production-ready complaint management system built for Bihar State Power Holding Company Ltd.</p>
-
-[![Live Demo](https://img.shields.io/badge/LIVE%20DEMO-Visit%20Portal-brightgreen?style=for-the-badge&logo=render&logoColor=white)](https://bsphcl-complaint-portal.onrender.com)
-
-![Flask](https://img.shields.io/badge/Flask-000000?style=flat-square&logo=flask&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
-![Bootstrap](https://img.shields.io/badge/Bootstrap%205-7952B3?style=flat-square&logo=bootstrap&logoColor=white)
-![Render](https://img.shields.io/badge/Deployed%20on-Render-46E3B7?style=flat-square&logo=render&logoColor=white)
-
-</div>
+**Live Demo:** [bsphcl-complaint-portal.onrender.com](https://bsphcl-complaint-portal.onrender.com)
 
 ---
 
-## About
-
-A full-stack complaint management portal built during an internship at **Bihar State Power Holding Company Ltd. (BSPHCL)**. The system handles the complete complaint lifecycle — from submission by consumers to resolution by staff — with role-based access, analytics, and PDF/Excel exports.
-
----
-
-## Live Demo
-
-**URL:** https://bsphcl-complaint-portal.onrender.com
+## Demo Credentials
 
 | Role | Email | Password |
-|---|---|---|
-| Admin | admin@bsphcl.gov.in | Admin@2024 |
-| Consumer | Register directly on the website | — |
+|------|-------|----------|
+| Super Admin | admin@bsphcl.gov.in | Admin@2024 |
+| Staff (Operator) | rajiv.ranjan@bsphcl.gov.in | Staff@2024 |
+| Staff (Officer) | meena.kumari@bsphcl.gov.in | Staff@2024 |
+| Consumer | priya.singh1@gmail.com | Consumer@2024 |
 
----
-
-## Features
-
-**Consumer Side**
-- Register and submit complaints with file attachments
-- Track complaint status using Complaint ID + Consumer Number
-- Download acknowledgement slip
-- Rate satisfaction after resolution
-
-**Admin Side**
-- Role-based access: Super Admin, Complaint Officer, Operator, Field Staff
-- Full complaint lifecycle: Submit → Review → Assign → Resolve → Close → Reopen
-- Priority-based handling and department assignment
-- Internal staff remarks and timeline logging
-- Search, filter, and export complaints to Excel and PDF
-- Analytics dashboard with district/category-wise charts (Chart.js)
-
-**Security**
-- OTP-based authentication
-- CSRF protection
-- Secure environment-based configuration
+> The demo database is pre-seeded with 160 realistic Bihar electricity complaints across 20 districts, 30 consumer accounts, and 4 staff accounts.
 
 ---
 
 ## Tech Stack
 
 | Layer | Technology |
-|---|---|
-| Backend | Flask, Flask-SQLAlchemy, Flask-Login, Flask-Mail |
-| Database | PostgreSQL (Production), SQLite (Local) |
-| Frontend | HTML5, Bootstrap 5, Chart.js |
-| Exports | ReportLab (PDF), OpenPyXL (Excel) |
-| Deployment | Render, Gunicorn |
+|-------|-----------|
+| Backend | Python 3.11, Flask 3.0 |
+| Database | PostgreSQL (Render), SQLite (local dev) |
+| ORM | SQLAlchemy + Flask-Migrate |
+| Frontend | Bootstrap 5.3, Chart.js 4.4, Noto Sans |
+| File Storage | Cloudinary (production), local disk (dev) |
+| PDF Generation | ReportLab 4.2 |
+| Email | Flask-Mail (SMTP) |
+| Deployment | Render (free tier) |
+| Auth | Flask-Login + bcrypt |
+
+---
+
+## Features
+
+### Consumer Portal
+- **Register & Login** — account creation with validation, OTP-based password reset
+- **File Complaint** — 10 categories (Power Outage, Billing, Meter Fault, Transformer, Low Voltage, New Connection, Street Light, Safety, Service Request, Other)
+- **Track Complaints** — real-time status, priority, assigned officer, expected resolution date
+- **Public Tracker** — track by Complaint ID + Consumer Number without logging in
+- **PDF Downloads** — Acknowledgement Slip and Resolution Report with official BSPHCL letterhead
+- **CSV Export** — download complaint history as spreadsheet
+- **Reply Thread** — two-way communication with BSPHCL staff
+- **Satisfaction Rating** — rate resolved complaints (1–5 stars)
+- **Notifications** — status update alerts with read/unread tracking
+- **Profile Management** — photo upload (Cloudinary), password change
+
+### Admin / Staff Panel
+- **Operations Dashboard** — live KPI cards, 7-day trend chart, category donut, district bar chart
+- **All Complaints** — filterable by status/priority/category/district, bulk status update + bulk assign
+- **Complaint Workflow** — update status, priority, assignee, ETA, resolution summary, internal remarks, consumer-visible notes
+- **Consumer Management** — view profiles, complaint history, activate/deactivate accounts
+- **Staff Management** — add staff (super admin only), set roles, reset passwords
+- **Reports Page** — monthly trend, status breakdown, priority distribution, top districts, date range filter, Excel + PDF export
+- **Audit Trail** — every status change logged with timestamp and actor
+
+### Security
+- CSRF protection on all POST forms
+- Role-based access control (consumer / operator / complaint_officer / field_staff / super_admin)
+- Password hashing (bcrypt via Werkzeug)
+- Session management via Flask-Login
+- Input validation both client-side and server-side
+
+---
+
+## Local Setup
+
+```bash
+# 1. Clone
+git clone https://github.com/sakshii1411/bspchcl-complaint-portal.git
+cd bspchcl-complaint-portal
+
+# 2. Virtual environment
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Environment variables — create .env file
+cp .env.example .env
+# Edit .env with your values (see below)
+
+# 5. Initialise database
+python init_db.py
+
+# 6. Seed demo data (optional)
+python seed_demo.py
+
+# 7. Run
+python run.py
+# → http://localhost:5001
+```
+
+### Environment Variables
+
+```env
+# Required
+SECRET_KEY=your-secret-key-here
+DATABASE_URL=sqlite:///bsphcl.db       # or postgresql://...
+
+# Email (optional — OTP shown on screen if not set)
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=True
+MAIL_USERNAME=your@gmail.com
+MAIL_PASSWORD=your-app-password        # Gmail App Password
+
+# Cloudinary (optional — local disk used if not set)
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+```
 
 ---
 
 ## Project Structure
 
 ```
-app.py              # App factory
-config.py           # Environment configuration
-models.py           # Database models (6+ tables)
-main_routes.py      # Consumer routes
-admin_routes.py     # Admin routes
-utils.py            # Helper functions
-init_db.py          # DB initialization
-static/             # CSS, JS, images
-templates/          # HTML templates
+bspchcl-complaint-portal/
+├── app.py              # Application factory
+├── models.py           # SQLAlchemy models (User, Complaint, etc.)
+├── main_routes.py      # Consumer routes
+├── admin_routes.py     # Admin/staff routes
+├── utils.py            # Helpers: PDF, email, file upload, OTP
+├── extensions.py       # Flask extensions (db, mail, login_manager)
+├── config.py           # Configuration classes
+├── init_db.py          # DB init + admin seeder
+├── seed_demo.py        # Demo dataset (160 complaints, 30 users)
+├── run.py              # Gunicorn entry point
+├── requirements.txt
+├── static/
+│   ├── css/style.css   # BSPHCL government design system
+│   └── js/scripts.js
+└── templates/
+    ├── base.html        # Sidebar + topbar layout
+    ├── login.html
+    ├── register.html
+    ├── dashboard.html
+    ├── complaint_form.html
+    ├── complaint_history.html
+    ├── complaint_detail.html
+    ├── profile.html
+    ├── notifications.html
+    ├── help_desk.html   # Public complaint tracker + FAQ
+    ├── admin/
+    │   ├── dashboard_admin.html
+    │   ├── all_complaints.html
+    │   ├── complaint_detail_admin.html
+    │   ├── manage_users.html
+    │   ├── manage_staff.html
+    │   └── reports.html
+    └── errors/
+        ├── 404.html
+        ├── 403.html
+        └── 500.html
 ```
 
 ---
 
-## Run Locally
+## Deployment (Render)
 
-```bash
-# Clone the repo
-git clone https://github.com/sakshii1411/bspchcl-complaint-portal.git
-cd bspchcl-complaint-portal
+1. Fork / push to GitHub
+2. Create a new **Web Service** on [render.com](https://render.com)
+3. Connect your GitHub repo
+4. Set **Build Command:** `pip install -r requirements.txt && python init_db.py`
+5. Set **Start Command:** `gunicorn run:app`
+6. Add environment variables in the Render dashboard
+7. Add a free **PostgreSQL** database and copy the `DATABASE_URL`
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Set environment variables
-cp .env.example .env
-# Edit .env with your values
-
-# Initialize database
-python init_db.py
-
-# Run the app
-python run.py
-```
-
-Open: http://127.0.0.1:5001
+The app auto-seeds demo data on first deploy when the complaints table is empty.
 
 ---
 
-## Environment Variables
+## Built by
 
-```
-SECRET_KEY=your-secret-key
-ADMIN_SECRET_CODE=your-admin-code
-DATABASE_URL=your-postgresql-url
-MAIL_USERNAME=your-email
-MAIL_PASSWORD=your-app-password
-```
-
----
-
-## Deployment
-
-Deployed on **Render** using:
-- Render Web Service
-- Gunicorn as production server
-- PostgreSQL add-on for database
-- Environment variables for secrets
-- Automatic DB initialization on deploy
-
----
-
-## Future Enhancements
-
-- OTP-based login via mobile number
-- WhatsApp/SMS integration for status updates
-- Automated complaint escalation system
-- Real-time notifications
-- AI-based complaint categorization
-
----
-
-<div align="center">
-
-Built by [Sakshi Awasthi](https://github.com/sakshii1411) during internship at BSPHCL, Jun–Jul 2025
-
-</div>
+**Sakshi Awasthi** — B.Tech CSE, MIT World Peace University, Pune (2027)  
+Internship at Bihar State Power Holding Company Limited, Patna  
+GitHub: [@sakshii1411](https://github.com/sakshii1411) · [LinkedIn](https://linkedin.com/in/sakshi-awasthi14)

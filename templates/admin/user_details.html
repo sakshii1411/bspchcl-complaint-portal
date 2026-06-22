@@ -24,7 +24,7 @@
   <div class="col-lg-4">
     <div class="card p-4 text-center mb-4">
       {% if user.profile_pic %}
-        <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}"
+        <img src="{{ get_file_url(user.profile_pic) }}"
              style="width:80px;height:80px;border-radius:50%;object-fit:cover;
                     border:3px solid var(--navy-soft);margin:0 auto 12px;" alt="">
       {% else %}

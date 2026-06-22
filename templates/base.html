@@ -104,7 +104,7 @@
             <a href="{{ url_for('main.profile') if not current_user.is_staff else '#' }}"
                style="display:flex;align-items:center;gap:8px;text-decoration:none;">
               {% if current_user.profile_pic %}
-                <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}"
+                <img src="{{ get_file_url(current_user.profile_pic) }}"
                      style="width:32px;height:32px;border-radius:50%;object-fit:cover;
                             border:2px solid rgba(255,255,255,0.2);" alt="">
               {% else %}
