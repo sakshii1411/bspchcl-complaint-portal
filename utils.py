@@ -34,17 +34,39 @@ def generate_otp(length=6):
 # ── CSRF ────────────────────────────────────────────────────────────────────
 
 def get_csrf_token():
-    token = session.get('_csrf_token')
-    if not token:
-        token = secrets.token_hex(16)
-        session['_csrf_token'] = token
+    """Generate a stateless HMAC CSRF token — works across multiple gunicorn workers."""
+    import hmac, hashlib, time
+    # Use session id + day bucket so token rotates daily but works across workers
+    session_id = session.get('_uid', '')
+    if not session_id:
+        session_id = secrets.token_hex(8)
+        session['_uid'] = session_id
+    day = str(int(time.time()) // 86400)
+    secret = current_app.config.get('SECRET_KEY', 'fallback')
+    msg = f'{session_id}:{day}'
+    token = hmac.new(secret.encode(), msg.encode(), hashlib.sha256).hexdigest()
     return token
 
 
 def validate_csrf_token():
+    """Validate HMAC CSRF token — accepts today and yesterday to handle midnight edge case."""
+    import hmac as hmac_mod, hashlib, time
     token = request.form.get('_csrf_token') or request.headers.get('X-CSRFToken')
-    if not token or token != session.get('_csrf_token'):
-        abort(400, description='Invalid security token.')
+    if not token:
+        abort(400, description='Missing security token.')
+    session_id = session.get('_uid', '')
+    secret = current_app.config.get('SECRET_KEY', 'fallback')
+    now_day = int(time.time()) // 86400
+    valid = False
+    for day_offset in [0, -1]:  # Accept today and yesterday
+        day = str(now_day + day_offset)
+        msg = f'{session_id}:{day}'
+        expected = hmac_mod.new(secret.encode(), msg.encode(), hashlib.sha256).hexdigest()
+        if hmac_mod.compare_digest(token, expected):
+            valid = True
+            break
+    if not valid:
+        abort(400, description='Invalid security token. Please refresh and try again.')
 
 
 # ── File Helpers ─────────────────────────────────────────────────────────────

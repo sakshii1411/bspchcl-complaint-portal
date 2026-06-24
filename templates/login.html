@@ -85,7 +85,7 @@
               <span style="color:var(--text-secondary);">Consumer</span>
               <div style="display:flex;gap:6px;">
                 <button type="button" class="demo-fill-btn"
-                        data-email="priya.singh1@gmail.com" data-pw="Consumer@2024"
+                        data-email="sunita.singh.001@gmail.com" data-pw="Consumer@2024"
                         style="background:var(--navy);color:#fff;border:none;border-radius:3px;
                                padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;">
                   Fill Credentials
@@ -128,8 +128,8 @@
             </div>
           </div>
 
-          <button type="submit" class="btn-primary-custom w-100 justify-content-center mb-3" style="padding:11px;">
-            Sign In &nbsp;<i class="bi bi-arrow-right"></i>
+          <button type="submit" id="signin-btn" class="btn-primary-custom w-100 justify-content-center mb-3" style="padding:11px;">
+            Sign In &nbsp;<i class="bi bi-arrow-right" id="signin-icon"></i>
           </button>
 
           <div class="text-center" style="font-size:13px;color:var(--text-muted);">
@@ -159,6 +159,16 @@
 
 <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 <script>
+// Show loading state on sign in (Render cold start can take 30s+)
+document.querySelector('form[action*="login"]')?.addEventListener('submit', function() {
+  const btn = document.getElementById('signin-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Signing in…';
+    btn.style.opacity = '0.85';
+  }
+});
+
 document.querySelectorAll('.demo-fill-btn').forEach(btn => {
   btn.addEventListener('click', function() {
     document.querySelector('input[name="email"]').value = this.dataset.email;

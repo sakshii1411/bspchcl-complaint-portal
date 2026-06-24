@@ -18,12 +18,20 @@
   <!-- ── SIDEBAR ─────────────────────────────────────── -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <div class="sidebar-brand-stripe">Bihar State Power Holding Company Limited</div>
+      <div class="sidebar-brand-stripe" style="{% if current_user.is_authenticated and current_user.is_staff %}background:var(--primary);{% else %}background:var(--primary);{% endif %}">
+        Bihar State Power Holding Company Limited
+      </div>
       <div class="sidebar-brand-body">
         <div class="brand-icon">⚡</div>
         <div class="brand-text">
           <div class="brand-name">BSPHCL</div>
-          <div class="brand-sub">Complaint Portal</div>
+          <div class="brand-sub">
+            {% if current_user.is_authenticated and current_user.is_staff %}
+              <span style="color:#ffaaaa;font-weight:700;letter-spacing:.5px;">ADMIN PORTAL</span>
+            {% else %}
+              Complaint Portal
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
