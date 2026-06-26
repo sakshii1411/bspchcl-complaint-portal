@@ -74,28 +74,48 @@
           {% endfor %}
         {% endwith %}
 
-        <!-- Demo credentials banner — Consumer only -->
-        <div style="background:var(--navy-soft);border:1px solid #b8ccdf;border-radius:var(--radius-sm);
+        <!-- Demo credentials banner -->
+        <div style="background:#eaf0f7;border:1px solid #b8ccdf;border-radius:4px;
                     padding:12px 14px;margin-bottom:16px;">
-          <div style="font-weight:700;color:var(--navy);margin-bottom:8px;font-size:12.5px;">
+          <div style="font-weight:700;color:#1A3A5C;margin-bottom:10px;font-size:12.5px;">
             <i class="bi bi-info-circle-fill me-1"></i> Demo Credentials
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-            <div style="font-size:12.5px;">
-              <div style="color:var(--text-secondary);font-weight:600;">Consumer Account</div>
-              <div style="color:var(--text-muted);font-size:11.5px;margin-top:2px;">
+
+          <!-- Consumer row -->
+          <div style="display:flex;justify-content:space-between;align-items:center;
+                      padding:8px 10px;background:#fff;border:1px solid #d0dce8;border-radius:3px;
+                      margin-bottom:6px;flex-wrap:wrap;gap:8px;">
+            <div>
+              <div style="color:#1a1a1a;font-size:12px;font-weight:700;">Consumer</div>
+              <div style="color:#555;font-size:11px;margin-top:2px;font-family:monospace;">
                 sunita.singh.001@gmail.com &nbsp;/&nbsp; Consumer@2024
               </div>
             </div>
             <button type="button" class="demo-fill-btn"
                     data-email="sunita.singh.001@gmail.com" data-pw="Consumer@2024"
-                    style="background:var(--navy);color:#fff;border:none;border-radius:3px;
-                           padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">
+                    style="background:#1A3A5C;color:#fff;border:none;border-radius:3px;
+                           padding:5px 14px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;">
               <i class="bi bi-box-arrow-in-right me-1"></i> Fill &amp; Login
             </button>
           </div>
-          <div style="margin-top:8px;padding-top:8px;border-top:1px solid #b8ccdf;font-size:11px;color:var(--text-muted);">
-            For admin access use the <a href="{{ url_for('admin.admin_login') }}" style="color:var(--navy);font-weight:600;">Staff / Admin Login</a> link below.
+
+          <!-- Staff / Complaint Officer row -->
+          <div style="display:flex;justify-content:space-between;align-items:center;
+                      padding:8px 10px;background:#fff;border:1px solid #d0dce8;border-radius:3px;
+                      flex-wrap:wrap;gap:8px;">
+            <div>
+              <div style="color:#1a1a1a;font-size:12px;font-weight:700;">Staff (Complaint Officer)</div>
+              <div style="color:#555;font-size:11px;margin-top:2px;font-family:monospace;">
+                meena.kumari@bsphcl.gov.in &nbsp;/&nbsp; Staff@2024
+              </div>
+            </div>
+            <a href="{{ url_for('admin.admin_login') }}"
+               onclick="sessionStorage.setItem('demo_email','meena.kumari@bsphcl.gov.in');sessionStorage.setItem('demo_pw','Staff@2024');"
+               style="background:#8B1A1A;color:#fff;border:none;border-radius:3px;
+                      padding:5px 14px;font-size:11.5px;font-weight:600;cursor:pointer;
+                      white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+              <i class="bi bi-shield-lock"></i> Go to Staff Login
+            </a>
           </div>
         </div>
 
