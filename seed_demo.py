@@ -540,6 +540,61 @@ def seed():
     db.session.commit()
     print(f"   notifications: {notifs}")
 
+    # ── 8. Recent complaints (last 7 days) — makes trend chart show activity ──
+    recent_categories = ["power_outage","billing","meter_fault","transformer","low_voltage","safety"]
+    recent_statuses   = ["pending","under_review","in_progress","pending","under_review","in_progress","pending"]
+    for day_offset in range(7):
+        # 2–5 complaints per day for the last 7 days
+        daily_count = random.randint(2, 5)
+        for _ in range(daily_count):
+            consumer  = random.choice(consumers)
+            category  = random.choice(recent_categories)
+            tmpl      = TEMPLATES[category]
+            priority  = _wc(tmpl["priority"])
+            area      = random.choice(AREAS)
+            subject   = _fill(random.choice(tmpl["subjects"]), area=area, district=consumer.district)[:200]
+            desc      = _fill(random.choice(tmpl["descriptions"]), area=area, district=consumer.district)
+            status    = random.choice(recent_statuses)
+            # created today minus day_offset, random hour
+            created_at = datetime.utcnow().replace(hour=random.randint(8,20),
+                         minute=random.randint(0,59), second=0, microsecond=0)                          - timedelta(days=day_offset)
+            cid = f"BSP{datetime.utcnow().year}{seq:05d}"
+            while cid in existing_cids:
+                seq += 1
+                cid = f"BSP{datetime.utcnow().year}{seq:05d}"
+            existing_cids.add(cid)
+            seq += 1
+            assignee = random.choice(staff_objs) if status != "pending" else None
+            c = Complaint(
+                complaint_id   = cid,
+                user_id        = consumer.id,
+                subject        = subject,
+                description    = desc,
+                category       = category,
+                priority       = priority,
+                status         = status,
+                district       = consumer.district,
+                address        = f"{area}, {consumer.district}, Bihar",
+                consumer_number= consumer.consumer_number,
+                meter_number   = f"MTR{random.randint(100000,999999)}",
+                assigned_to    = assignee.id if assignee else None,
+                department     = assignee.department if assignee else None,
+                expected_resolution_date = created_at + timedelta(days={"urgent":1,"high":2,"medium":4,"low":7}[priority]),
+                created_at     = created_at,
+                updated_at     = created_at,
+            )
+            db.session.add(c)
+            db.session.flush()
+            db.session.add(ComplaintLog(
+                complaint_id=c.id, user_id=consumer.id,
+                action="complaint_filed",
+                message=f"Complaint {c.complaint_id} filed by consumer.",
+                created_at=created_at,
+            ))
+            complaint_objs.append((c, consumer, assignee))
+    db.session.commit()
+    print(f"   recent (last 7 days): added")
+
     # ── Summary ────────────────────────────────────────────────────────────────
     rows = db.session.execute(
         text("SELECT status, COUNT(*) as n FROM complaints GROUP BY status ORDER BY n DESC")
@@ -555,3 +610,94 @@ def seed():
     print("   Staff    rajiv.ranjan@bsphcl.gov.in     / Staff@2024")
     print(f"  Consumer {consumers[1].email} / Consumer@2024")
     print("="*50)
+
+
+def seed_recent_only():
+    """Add complaints for the last 7 days so the trend chart shows activity.
+    Safe to call on an existing DB — uses existing consumers and staff."""
+    from sqlalchemy import text as sa_text
+    print("   Adding recent complaints for trend chart...")
+
+    # Get existing consumers and staff
+    consumers = [u for u in __import__('models').User.query.filter_by(role='consumer').all()]
+    staff_objs = [u for u in __import__('models').User.query.filter_by(is_admin=True).all()]
+
+    if not consumers:
+        print("   No consumers found — skipping recent seed")
+        return
+    if not staff_objs:
+        print("   No staff found — skipping recent seed")
+        return
+
+    existing_cids = {r[0] for r in db.session.execute(sa_text("SELECT complaint_id FROM complaints")).fetchall()}
+
+    # Get next seq
+    last = db.session.execute(
+        sa_text("SELECT complaint_id FROM complaints WHERE complaint_id LIKE 'BSP%' ORDER BY created_at DESC LIMIT 1")
+    ).fetchone()
+    seq = 1001
+    if last:
+        try:
+            seq = int(last[0].replace(f'BSP{datetime.utcnow().year}','')) + 1
+        except Exception:
+            seq = 9001
+
+    recent_cats = ["power_outage","billing","meter_fault","transformer","low_voltage","safety"]
+    recent_statuses = ["pending","under_review","in_progress","pending","pending","under_review","in_progress"]
+    added = 0
+
+    for day_offset in range(7):
+        daily = random.randint(3, 6)
+        for _ in range(daily):
+            consumer  = random.choice(consumers)
+            category  = random.choice(recent_cats)
+            tmpl      = TEMPLATES[category]
+            priority  = _wc(tmpl["priority"])
+            area      = random.choice(AREAS)
+            subject   = _fill(random.choice(tmpl["subjects"]), area=area, district=consumer.district)[:200]
+            desc      = _fill(random.choice(tmpl["descriptions"]), area=area, district=consumer.district)
+            status    = random.choice(recent_statuses)
+            created_at = datetime.utcnow().replace(
+                hour=random.randint(7,21), minute=random.randint(0,59),
+                second=0, microsecond=0
+            ) - timedelta(days=day_offset)
+
+            cid = f"BSP{datetime.utcnow().year}{seq:05d}"
+            while cid in existing_cids:
+                seq += 1
+                cid = f"BSP{datetime.utcnow().year}{seq:05d}"
+            existing_cids.add(cid)
+            seq += 1
+
+            assignee = random.choice(staff_objs) if status != "pending" else None
+            c = Complaint(
+                complaint_id   = cid,
+                user_id        = consumer.id,
+                subject        = subject,
+                description    = desc,
+                category       = category,
+                priority       = priority,
+                status         = status,
+                district       = consumer.district,
+                address        = f"{area}, {consumer.district}, Bihar",
+                consumer_number= consumer.consumer_number,
+                meter_number   = f"MTR{random.randint(100000,999999)}",
+                assigned_to    = assignee.id if assignee else None,
+                department     = assignee.department if assignee else None,
+                expected_resolution_date = created_at + timedelta(
+                    days={"urgent":1,"high":2,"medium":4,"low":7}[priority]),
+                created_at     = created_at,
+                updated_at     = created_at,
+            )
+            db.session.add(c)
+            db.session.flush()
+            db.session.add(ComplaintLog(
+                complaint_id=c.id, user_id=consumer.id,
+                action="complaint_filed",
+                message=f"Complaint {c.complaint_id} filed by consumer.",
+                created_at=created_at,
+            ))
+            added += 1
+
+    db.session.commit()
+    print(f"   Added {added} recent complaints across last 7 days.")

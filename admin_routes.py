@@ -63,7 +63,10 @@ def admin_dashboard():
     resolved_c = Complaint.query.filter_by(status='resolved').count()
     closed_c = Complaint.query.filter_by(status='closed').count()
     rejected_c = Complaint.query.filter_by(status='rejected').count()
-    overdue_c = sum(1 for c in Complaint.query.all() if c.is_overdue)
+    overdue_c = Complaint.query.filter(
+        Complaint.expected_resolution_date < datetime.utcnow(),
+        Complaint.status.notin_(['resolved', 'closed', 'rejected'])
+    ).count()
     total_users = User.query.filter_by(is_admin=False).count()
     active_users = User.query.filter_by(is_admin=False, is_active=True).count()
     inactive_users = User.query.filter_by(is_admin=False, is_active=False).count()

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Consumer Dashboard – BSPHCL Portal{% endblock %}
+{% block title %}My Dashboard{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -49,7 +49,18 @@
         <a href="{{ url_for('main.complaint_history') }}" class="btn-ghost" style="padding:6px 12px;font-size:12.5px;">View All Records</a>
       </div>
 
-      {% if recent %}
+      {% if not recent %}
+        <div class="text-center py-5">
+          <i class="bi bi-clipboard-plus" style="font-size:40px;color:var(--navy-soft);display:block;margin-bottom:12px;opacity:0.5;"></i>
+          <h6 class="fw-700" style="color:var(--navy-dark);">No complaints filed yet</h6>
+          <p class="text-muted" style="font-size:13px;max-width:320px;margin:0 auto 16px;">
+            File your first complaint to get started. Track status, communicate with staff, and download receipts.
+          </p>
+          <a href="{{ url_for('main.new_complaint') }}" class="btn-primary-custom">
+            <i class="bi bi-plus-circle"></i> File Your First Complaint
+          </a>
+        </div>
+      {% elif recent %}
         <div class="table-responsive">
           <table class="bsp-table">
             <thead>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Complaint History – BSPHCL Portal{% endblock %}
+{% block title %}My Complaints{% endblock %}
 
 {% block content %}
 {% set complaint_rows = pagination.items if pagination is defined else (complaints if complaints is defined else []) %}
