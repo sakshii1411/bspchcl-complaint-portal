@@ -108,24 +108,7 @@
             <div style="color:#888;font-size:10.5px;margin-top:5px;">Password: Consumer@2024</div>
           </div>
 
-          <!-- Staff / Complaint Officer row -->
-          <div style="display:flex;justify-content:space-between;align-items:center;
-                      padding:8px 10px;background:#fff;border:1px solid #d0dce8;border-radius:3px;
-                      flex-wrap:wrap;gap:8px;">
-            <div>
-              <div style="color:#1a1a1a;font-size:12px;font-weight:700;">Staff (Complaint Officer)</div>
-              <div style="color:#555;font-size:11px;margin-top:2px;font-family:monospace;">
-                meena.kumari@bsphcl.gov.in &nbsp;/&nbsp; Staff@2024
-              </div>
-            </div>
-            <a href="{{ url_for('admin.admin_login') }}"
-               onclick="sessionStorage.setItem('demo_email','meena.kumari@bsphcl.gov.in');sessionStorage.setItem('demo_pw','Staff@2024');"
-               style="background:#8B1A1A;color:#fff;border:none;border-radius:3px;
-                      padding:5px 14px;font-size:11.5px;font-weight:600;cursor:pointer;
-                      white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
-              <i class="bi bi-shield-lock"></i> Go to Staff Login
-            </a>
-          </div>
+
         </div>
 
         <form method="POST" action="{{ url_for('main.login') }}">
@@ -159,6 +142,17 @@
           <div class="text-center" style="font-size:13px;color:var(--text-muted);">
             New consumer? &nbsp;
             <a href="{{ url_for('main.register') }}" style="color:var(--navy);font-weight:600;">Register Here</a>
+          </div>
+
+          <hr style="margin:16px 0;border-color:var(--border);"/>
+          <div class="text-center">
+            <a href="{{ url_for('admin.admin_login') }}"
+               style="font-size:12.5px;background:var(--bg);border:1.5px solid var(--border);
+                      padding:8px 20px;border-radius:3px;color:var(--text-secondary);
+                      display:inline-flex;align-items:center;gap:7px;text-decoration:none;
+                      font-weight:600;transition:all 0.18s;">
+              <i class="bi bi-shield-lock" style="color:var(--navy);"></i> Login as Staff / Admin
+            </a>
           </div>
 
 
